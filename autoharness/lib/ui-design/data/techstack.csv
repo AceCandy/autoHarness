@@ -1,0 +1,17 @@
+stack,category,component_pattern,state_management,styling_approach,routing,optimization,testing_framework,best_for,notes
+html_tailwind,frontend,semantic_html_classes,none,tailwind_utilities,none,lazy_images,manual_test,static_sites,最简单快速原型
+react,frontend,functional_components,hooks/useContext,css_modules/styled,routers/browser,react_lazy,jest/rtl,spa_apps,最流行生态最大
+nextjs,fullstack,app_router,server_components,tailwind/css,next_router,ssr_isr_image,jest/playwright,production_web,ssr/seo/性能最佳
+vue,frontend,composition_api,ref/reactive,scoped_style,vue_router,async_components,vitest,enterprise_china,中国流行生态丰富
+nuxtjs,fullstack,nuxt_pages,pinia,nuxt_style,nuxt_router,ssr_cache,vitest,production_vue,vue生态ssr方案
+swiftui,ios_native,declarative_views,observable,system_style,nav_stack,async_image,xctest,ios_apps,苹果原生最新方案
+react_native,cross_platform,react_components,hooks,styled/native,react_nav,async_image,jest,hybrid_apps,一套代码两平台
+flutter,cross_platform,widgets,stateful_widgets,flutter_theme,go_router,lazy_image,flutter_test,premium_mobile,高性能跨平台最佳
+shadcn_ui,component_lib,radix_primitives,hooks,tailwind_vars,none,none,none,modern_saas,现代设计系统组件库
+angular,frontend,components_services,rxjs,angular_style,angular_router,async_pipe,jasmine,enterprise_legacy,企业级稳定性强
+laravel,fullstack,blade_components,livewire,blade_style,laravel_routes,cache_views,pest,php_apps,php生态最完整框架
+astro,hybrid,astro_components,none,astro_style,astro_router,ssr_partial,none,content_sites,内容网站性能最佳
+svelte,frontend,svelte_components,stores,svelte_style,svelte_router,ssr_none,vitest,lightweight,轻量高性能新选择
+django,fullstack,django_templates,forms_session,static_files,django_urls,cache_db,pytest,python_apps,python生态稳定框架
+rails,fullstack,erb_components,session,tailwind/rails,rails_routes,cache_assets,rspec,rapid_dev,快速开发传统强大
+solidjs,frontend,solid_components,signals,solid_style,solid_router,solid_lazy,none,performance,细粒度响应式高性能

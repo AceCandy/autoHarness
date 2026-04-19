@@ -1,0 +1,33 @@
+# macOS
+.DS_Store
+
+# Runtime / workspace
+/workspace/journals/
+/workspace/tool-usage.log
+/.planning/CONTEXT.md
+/.planning/REQUIREMENTS.md
+/.current-task
+/.ralph-state.json
+
+# Developer identity (per-person)
+.developer
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+
+# AutoHarness local install artifacts
+.claude/
+.codex/
+CLAUDE.md
+/workspace/STATE.md

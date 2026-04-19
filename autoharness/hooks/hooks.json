@@ -1,0 +1,18 @@
+{
+  "SessionStart": [{
+    "matcher": "",
+    "hooks": [{"type": "command", "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/session-start.js"}]
+  }],
+  "SessionEnd": [{
+    "matcher": "",
+    "hooks": [{"type": "command", "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/session-end.js"}]
+  }],
+  "PreToolUse": [{
+    "matcher": "",
+    "hooks": [{"type": "command", "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/pre-tool-use.js"}]
+  }],
+  "PostToolUse": [{
+    "matcher": "",
+    "hooks": [{"type": "command", "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/post-tool-use.js"}]
+  }]
+}
