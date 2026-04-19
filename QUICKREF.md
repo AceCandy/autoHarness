@@ -1,12 +1,13 @@
 # AutoHarness 快速参考卡
 
-> 一页纸记住当前只保留的 7 个命令。
+> 一页纸记住当前只保留的 8 个命令。
 
-## 命令速查 (7 个)
+## 命令速查 (8 个)
 
 | 命令 | 类型 | 用途 |
 |------|------|------|
-| `/ah-propose <name>` | 主命令 | 创建变更提案，并生成最小规格骨架 |
+| `/ah-new <name>` | 主命令 | 创建变更输入骨架，并先保存 PRD 来源 |
+| `/ah-propose <name>` | 主命令 | 基于 PRD 来源生成提案、设计和任务骨架 |
 | `/ah-discuss <name>` | 主命令 | 澄清需求、范围、边界和验收标准 |
 | `/ah-execute <name>` | 主命令 | 执行实现、推进任务、更新状态 |
 | `/ah-debug <issue>` | 主命令 | 复现、定位并修复缺陷，补齐回归验证 |
@@ -18,7 +19,7 @@
 
 ```text
 功能开发：
-/ah-propose -> /ah-discuss -> /ah-execute -> /ah-verify -> /ah-ship
+/ah-new -> /ah-propose -> /ah-discuss -> /ah-execute -> /ah-verify -> /ah-ship
 
 问题修复：
 /ah-debug -> /ah-verify -> /ah-ship
@@ -32,13 +33,16 @@
 | 文件 | 用途 |
 |------|------|
 | `.autoharness/project.md` | 项目最小上下文 |
+| `.autoharness/knowledge/business.md` | 业务背景、核心实体、术语和流程 |
+| `.autoharness/knowledge/rules.md` | 隐形条件、边界规则和禁区 |
+| `.autoharness/knowledge/decisions.md` | 已确认的重要决策 |
+| `.autoharness/specs/**/spec.md` | 稳定规格基线 |
+| `.autoharness/changes/<name>/source/prd.md` | 规范化后的 PRD 输入 |
 | `.autoharness/changes/<name>/proposal.md` | 变更目标、范围和验收标准 |
 | `.autoharness/changes/<name>/design.md` | 设计方案和关键取舍 |
 | `.autoharness/changes/<name>/tasks.md` | 执行清单和进度记录 |
 | `.autoharness/workspace/STATE.md` | 当前状态 |
 | `.autoharness/workspace/ROADMAP.md` | 路线图 |
-| `.autoharness/config/settings.json` | 全局配置 |
-| `.autoharness/config/memory.json` | 项目记忆 |
 
 ## 验证口径
 
@@ -53,7 +57,7 @@
 
 ## 黄金法则
 
-1. **规格先行** — 没对齐需求，不开始写代码
+1. **输入先落盘** — 先用 `/ah-new` 保存 PRD，再进入提案阶段
 2. **阶段单一** — 一个命令只负责一个阶段
 3. **验证统一** — 不再分散跑多个检查命令
-4. **文件留痕** — 重要状态和决策都落到文件里
+4. **知识与规格按需读取** — 只读当前变更最相关的 `knowledge` 和 `specs`

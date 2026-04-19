@@ -1,11 +1,12 @@
 # AutoHarness 工作流指南
 
-> 从需求到交付的完整路径，围绕 6 个主命令和 1 个高级命令展开。
+> 从需求到交付的完整路径，围绕 7 个主命令和 1 个高级命令展开。
 
 ## 总览
 
 ```text
 需求
+  -> /ah-new
   -> /ah-propose
   -> /ah-discuss
   -> /ah-execute
@@ -23,33 +24,50 @@
 
 适合：新功能、重构、较大改动
 
-### 1. `/ah-propose`
+### 1. `/ah-new`
 
-- 创建 `.autoharness/changes/<name>/`
+- 创建 `.autoharness/changes/<name>/source/`
+- 统一变更名称为 `<全小写拼音>-YYYYMMDD`
+- 保存原始需求来源：
+  - 文本/Markdown -> `source/prd.md`
+  - 链接 -> `source/prd.md`
+  - 文件 -> `source/prd.<ext>`
+- 如果当前环境存在 `prd2md` skill，可在这一阶段先转出 `source/prd.md`
+
+### 2. `/ah-propose`
+
+- 读取 `source/prd.md`，或 fallback 到 `source/prd.<ext>`
+- 读取 `.autoharness/project.md`
+- 按需读取相关 `.autoharness/knowledge/*.md`
+- 按需读取相关 `.autoharness/specs/**/spec.md`
+- 如果缺少任何 PRD 来源，提示先执行 `/ah-new`
 - 生成 `proposal.md`、`design.md`、`tasks.md`、`.autoharness/changes/<name>/specs/`
-- 明确变更名称和基本目标
+- 把原始需求提炼成可执行骨架
 
-### 2. `/ah-discuss`
+### 3. `/ah-discuss`
 
 - 澄清需求、边界、输入输出、风险和验收标准
+- 对照相关 `knowledge` 与 `specs` 补齐冲突和遗漏
 - 吸收原先的探索、计划、UI 讨论等前置工作
 - 更新 proposal/design/tasks
 
-### 3. `/ah-execute`
+### 4. `/ah-execute`
 
 - 读取当前变更上下文并拆成可执行的小步
+- 实现前按需复查相关 `knowledge` 与 `specs`
 - 直接进入实现
 - 需要时自动采用测试优先或小步提交策略
 - 更新 `tasks.md` 和状态文件
 
-### 4. `/ah-verify`
+### 5. `/ah-verify`
 
 - 统一执行代码、测试、构建与必要专项检查
+- 把相关 `specs` 与 `knowledge` 作为验收基线之一
 - 对 Web 项目可附加浏览器检查
 - 对性能敏感项目可附加性能检查
 - 给出通过、阻塞项、修复建议
 
-### 5. `/ah-ship`
+### 6. `/ah-ship`
 
 - 消费 `/ah-verify` 的结果
 - 完成提交、推送、PR 或其他交付动作

@@ -63,9 +63,14 @@ ls AGENTS.md
 ls .autoharness
 ```
 
-### Step 5: Fill in `.autoharness/project.md`
+### Step 5: Fill in project context and knowledge
 
-Document the tech stack, architecture, domain context, constraints, and conventions.
+Update these files before you start:
+
+- `.autoharness/project.md`
+- `.autoharness/knowledge/business.md`
+- `.autoharness/knowledge/rules.md`
+- `.autoharness/knowledge/decisions.md`
 
 ### Step 6: Restart your tool
 
@@ -78,7 +83,7 @@ codex
 ### Step 7: Try a command
 
 ```text
-/ah-propose test-feature
+/ah-new yonghudenglu-20260420
 ```
 
 ## 2. Start a New Project
@@ -94,6 +99,9 @@ bash /tmp/autoharness/scripts/install.sh all
 The install script already performs initialization. Then update:
 
 - `.autoharness/project.md`
+- `.autoharness/knowledge/business.md`
+- `.autoharness/knowledge/rules.md`
+- `.autoharness/knowledge/decisions.md`
 - `.autoharness/workspace/STATE.md`
 - `.autoharness/workspace/ROADMAP.md`
 
@@ -130,6 +138,7 @@ Install AutoHarness for both Claude Code and Codex
 ### Feature development
 
 ```text
+/ah-new <change-name>
 /ah-propose <change-name>
 /ah-discuss <change-name>
 /ah-execute <change-name>
@@ -166,6 +175,17 @@ ls .autoharness
 ```
 
 Then restart `claude` or `codex`.
+
+### Q1.1: What should `<change-name>` look like?
+
+Use this format:
+
+- `<lowercase-pinyin>-YYYYMMDD`
+
+For example:
+
+- `yonghudenglu-20260420`
+- `dingdanliebiao-20260420`
 
 ### Q2: Do I need to run `init` separately?
 

@@ -2,8 +2,9 @@
 
 > 一个只面向 `Claude Code` 和 `Codex` 的精简 AI 编码工作流框架。
 
-AutoHarness 现在只公开 7 个命令，其中 6 个是主线命令，1 个是高级命令：
+AutoHarness 现在只公开 8 个命令，其中 7 个是主线命令，1 个是高级命令：
 
+- `/ah-new`
 - `/ah-propose`
 - `/ah-discuss`
 - `/ah-execute`
@@ -64,7 +65,7 @@ bash scripts/install.sh all
 
 安装后的项目目录会按职责拆开：
 
-- `.autoharness/` 只保留共享工作流资产，如 `project.md`、`changes/`、`specs/`、`config/`、`workspace/`、`scripts/`
+- `.autoharness/` 只保留共享工作流资产，如 `project.md`、`knowledge/`、`changes/`、`specs/`、`workspace/`、`scripts/archive-change.sh`
 - `.claude/` 只保留 Claude 专属运行时资产，如 `skills/`、`hooks/`
 - `.codex/` 保持最小化，只配合根目录 `AGENTS.md` 使用
 
@@ -84,6 +85,21 @@ ls your-project/.autoharness
 
 然后重启你实际使用的工具。
 
+## 安装后建议人工填写
+
+开始实际开发前，建议由人先补齐这些文件：
+
+- 必填：`.autoharness/project.md`
+  重点填写项目概览、技术栈、启动/测试/构建入口、架构边界。
+- 必填：`.autoharness/knowledge/business.md`
+  重点填写业务背景、核心实体、关键流程、术语说明。
+- 必填：`.autoharness/knowledge/rules.md`
+  重点填写隐形条件、业务规则、边界与禁区、兼容性要求。
+- 推荐：`.autoharness/knowledge/decisions.md`
+  重点填写已经确认的重要决策、原因，以及不要轻易改动的内容。
+
+如果使用 Claude Code，进入项目时 `SessionStart` hook 会自动检查这些文件是否仍是模板占位，并给出中文提醒。
+
 ## 自然语言触发的脚本命令
 
 | 你说                  | 实际脚本                                                                      |
@@ -95,7 +111,8 @@ ls your-project/.autoharness
 
 ## 核心命令
 
-- `/ah-propose` — 创建一个新的变更提案，并生成最小必要的规格骨架。
+- `/ah-new` — 创建变更输入骨架，并先保存 PRD 来源。
+- `/ah-propose` — 读取 PRD 来源并生成最小必要的提案骨架。
 - `/ah-discuss` — 在写代码前澄清需求、范围、边界和验收标准。
 - `/ah-execute` — 按当前已确认的方案执行实现，并推进任务落地。
 - `/ah-debug` — 系统化复现、定位并修复缺陷，同时补齐回归验证。
@@ -107,7 +124,8 @@ ls your-project/.autoharness
 
 ```text
 功能开发：
-/ah-propose <name>
+/ah-new <name>
+-> /ah-propose <name>
 -> /ah-discuss <name>
 -> /ah-execute <name>
 -> /ah-verify <name>
@@ -123,11 +141,11 @@ ls your-project/.autoharness
 
 AutoHarness 保留五层结构：
 
-1. `Spec`：需求与变更规格
-2. `Skills`：按阶段划分的工作流命令
-3. `Enhancement`：hooks、验证、记忆
-4. `Execution`：实现与交付流程
-5. `Workspace`：文件化项目记忆
+1. `Input`：PRD 来源与变更输入
+2. `Knowledge`：项目上下文、业务规则、稳定规格
+3. `Skills`：按阶段划分的工作流命令
+4. `Runtime`：hooks、验证与状态留痕
+5. `Delivery`：实现、交付与归档
 
 ## 目录结构
 
@@ -136,9 +154,9 @@ AGENTS.md
 scripts/
 autoharness/
   project.md
+  knowledge/
   specs/
   changes/
-  config/
   workspace/
   skills/
   hooks/

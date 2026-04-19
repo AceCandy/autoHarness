@@ -4,6 +4,7 @@
 
 AutoHarness keeps the public workflow intentionally small. The command set is now:
 
+- `/ah-new`
 - `/ah-propose`
 - `/ah-discuss`
 - `/ah-execute`
@@ -65,7 +66,7 @@ Manual file copying is no longer supported. Install only through `scripts/instal
 
 Installed project layout is intentionally split:
 
-- `.autoharness/` keeps shared workflow assets such as `project.md`, `changes/`, `specs/`, `config/`, `workspace/`, and `scripts/`
+- `.autoharness/` keeps shared workflow assets such as `project.md`, `knowledge/`, `changes/`, `specs/`, `workspace/`, and `scripts/archive-change.sh`
 - `.claude/` keeps Claude-only runtime assets such as `skills/` and `hooks/`
 - `.codex/` stays minimal and uses root `AGENTS.md`
 
@@ -85,6 +86,21 @@ ls your-project/.autoharness
 
 Then restart the tool you use.
 
+## Recommended Manual Setup
+
+After installation, these files should be filled in by a human before starting real work:
+
+- Required: `.autoharness/project.md`
+  Fill in project overview, tech stack, run/test/build entrypoints, and architecture boundaries.
+- Required: `.autoharness/knowledge/business.md`
+  Fill in business background, core entities, key flows, and terminology.
+- Required: `.autoharness/knowledge/rules.md`
+  Fill in hidden constraints, business rules, boundaries, and compatibility requirements.
+- Recommended: `.autoharness/knowledge/decisions.md`
+  Fill in confirmed decisions, rationale, and things that should not be changed lightly.
+
+When Claude Code enters the project, the SessionStart hook will remind you if these files still look like templates.
+
 ## Natural Language Commands
 
 These are script actions triggered via natural language:
@@ -98,7 +114,8 @@ These are script actions triggered via natural language:
 
 ## Core Commands
 
-- `/ah-propose` — Create a new change proposal and generate the minimum spec skeleton.
+- `/ah-new` — Create a change input skeleton and save the PRD source first.
+- `/ah-propose` — Read the PRD source and generate the minimum proposal skeleton.
 - `/ah-discuss` — Clarify requirements, scope, edge cases, and acceptance criteria before coding.
 - `/ah-execute` — Implement the confirmed plan and move the work forward.
 - `/ah-debug` — Reproduce, isolate, and fix defects with regression validation.
@@ -110,7 +127,8 @@ These are script actions triggered via natural language:
 
 ```text
 Feature flow:
-/ah-propose <name>
+/ah-new <name>
+-> /ah-propose <name>
 -> /ah-discuss <name>
 -> /ah-execute <name>
 -> /ah-verify <name>
@@ -126,11 +144,11 @@ Bug fix flow:
 
 AutoHarness keeps the same five-layer structure:
 
-1. `Spec` - requirements and change specs
-2. `Skills` - stage-based workflow commands
-3. `Enhancement` - hooks, verification, memory
-4. `Execution` - implementation and delivery flow
-5. `Workspace` - file-based project memory
+1. `Input` - PRD source and change input
+2. `Knowledge` - project context, business rules, stable specs
+3. `Skills` - stage-based workflow commands
+4. `Runtime` - hooks, verification, workspace state
+5. `Delivery` - implementation, ship, archive
 
 ## Repository Layout
 
@@ -139,9 +157,9 @@ AGENTS.md
 scripts/
 autoharness/
   project.md
+  knowledge/
   specs/
   changes/
-  config/
   workspace/
   skills/
   hooks/

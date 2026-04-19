@@ -113,18 +113,19 @@ fi
 [ ! -f "AGENTS.md" ] && cp "$AGENTS_TEMPLATE" .
 [ ! -f ".autoharness/project.md" ] && [ "$ASSET_SELF" = false ] && cp "$ASSET_DIR/project.md" ".autoharness/project.md"
 rm -f ".autoharness/AGENTS.md"
-rm -rf ".autoharness/rules" ".autoharness/skills" ".autoharness/hooks" ".autoharness/lib"
+rm -rf ".autoharness/config" ".autoharness/rules" ".autoharness/skills" ".autoharness/hooks" ".autoharness/lib"
+rm -f ".autoharness/scripts/install.sh" ".autoharness/scripts/update.sh" ".autoharness/scripts/init.sh" ".autoharness/scripts/uninstall.sh"
 
 if [ "$ASSET_SELF" = false ]; then
-  for dir in specs changes config workspace; do
+  for dir in specs changes knowledge workspace; do
     if [ -d "$ASSET_DIR/$dir" ]; then
       cp -rn "$ASSET_DIR/$dir" ".autoharness/" 2>/dev/null || true
     fi
   done
 fi
 
-if [ -d "$SCRIPT_SOURCE_DIR" ] && [ "$SOURCE_SCRIPT_DIR" != "$TARGET_SCRIPT_DIR" ]; then
-  cp -rn "$SCRIPT_SOURCE_DIR/"* ".autoharness/scripts/" 2>/dev/null || true
+if [ -f "$SCRIPT_SOURCE_DIR/archive-change.sh" ] && [ "$SOURCE_SCRIPT_DIR" != "$TARGET_SCRIPT_DIR" ]; then
+  cp "$SCRIPT_SOURCE_DIR/archive-change.sh" ".autoharness/scripts/archive-change.sh"
 fi
 
 mkdir -p .autoharness/changes/archive
@@ -233,11 +234,11 @@ echo "已启用工具: ${TOOLS[*]}"
 echo ""
 echo "当前项目结构:"
 echo "  - 根目录: AGENTS.md / 可选 CLAUDE.md / .claude / .codex"
-echo "  - 内部资产: .autoharness/"
+echo "  - 内部资产: .autoharness/（project / knowledge / specs / changes / workspace / scripts）"
 echo ""
 echo "下一步:"
-echo "  1. 编辑 .autoharness/project.md 填入你的项目信息"
+echo "  1. 编辑 .autoharness/project.md 与 .autoharness/knowledge/*.md 补齐项目上下文"
 echo "  2. 启动你的 AI 编码工具"
-echo "  3. 输入 /ah-propose <name> 开始第一个变更提案"
-echo "  4. 然后输入 /ah-discuss <name> 澄清范围和验收标准"
+echo "  3. 输入 /ah-new <name> 保存 PRD 来源"
+echo "  4. 然后输入 /ah-propose <name> 生成提案骨架"
 echo ""

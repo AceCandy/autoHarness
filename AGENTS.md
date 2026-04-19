@@ -2,7 +2,7 @@
 
 ```text
 功能开发：
-/ah-propose -> /ah-discuss -> /ah-execute -> /ah-verify -> /ah-ship
+/ah-new -> /ah-propose -> /ah-discuss -> /ah-execute -> /ah-verify -> /ah-ship
 
 问题修复：
 /ah-debug -> /ah-verify -> /ah-ship
@@ -13,12 +13,14 @@
 
 ## 阶段切换规则
 
-1. 需求未对齐时，先走 `/ah-discuss`，不要直接进入 `/ah-execute`。
-2. 新功能和较大改动，默认从 `/ah-propose` 开始。
-3. 已有明确问题时，优先走 `/ah-debug`，不要把修 bug 混成新功能流程。
-4. `/ah-verify` 是统一验证入口；实现完成后先验证，再决定是否交付。
-5. `/ah-ship` 只消费验证结果，不替代 `/ah-verify`。
-6. `/ah-worktree` 是可选的高级入口，只在需要隔离目录或分支时使用。
+1. 有外部需求输入时，先走 `/ah-new` 保存 PRD 来源，再进入 `/ah-propose`。
+2. 变更名称统一使用 `<全小写拼音>-YYYYMMDD`，不要直接使用中文目录名。
+3. 需求未对齐时，先走 `/ah-discuss`，不要直接进入 `/ah-execute`。
+4. 新功能和较大改动，默认从 `/ah-new` 开始。
+5. 已有明确问题时，优先走 `/ah-debug`，不要把修 bug 混成新功能流程。
+6. `/ah-verify` 是统一验证入口；实现完成后先验证，再决定是否交付。
+7. `/ah-ship` 只消费验证结果，不替代 `/ah-verify`。
+8. `/ah-worktree` 是可选的高级入口，只在需要隔离目录或分支时使用。
 
 ## 默认执行约束
 
@@ -35,3 +37,4 @@
 2. 一个命令只负责一个阶段，不跨阶段混用。
 3. 重要状态、讨论结论和执行进度应写回文件，而不是只留在对话里。
 4. 安装、更新、卸载属于仓库维护动作，不属于默认运行时主流程。
+5. `/ah-propose`、`/ah-discuss`、`/ah-execute`、`/ah-verify` 应按需读取 `.autoharness/knowledge/` 和相关 `.autoharness/specs/`，不要默认全量通读。

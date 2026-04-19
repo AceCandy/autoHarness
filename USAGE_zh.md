@@ -63,9 +63,14 @@ ls AGENTS.md
 ls .autoharness
 ```
 
-### 步骤 5：填写项目上下文
+### 步骤 5：填写项目上下文和知识库
 
-编辑 `.autoharness/project.md`，填入技术栈、架构、业务背景、约束和规范。
+开始前至少补齐这些文件：
+
+- `.autoharness/project.md`
+- `.autoharness/knowledge/business.md`
+- `.autoharness/knowledge/rules.md`
+- `.autoharness/knowledge/decisions.md`
 
 ### 步骤 6：重启工具
 
@@ -78,7 +83,7 @@ codex
 ### 步骤 7：测试命令
 
 ```text
-/ah-propose test-feature
+/ah-new yonghudenglu-20260420
 ```
 
 ## 2. 新项目初始化
@@ -94,6 +99,9 @@ bash /tmp/autoharness/scripts/install.sh all
 安装脚本已经同时完成初始化。安装后建议立刻补全：
 
 - `.autoharness/project.md`
+- `.autoharness/knowledge/business.md`
+- `.autoharness/knowledge/rules.md`
+- `.autoharness/knowledge/decisions.md`
 - `.autoharness/workspace/STATE.md`
 - `.autoharness/workspace/ROADMAP.md`
 
@@ -130,6 +138,7 @@ bash /tmp/autoharness/scripts/install.sh all
 ### 标准功能开发
 
 ```text
+/ah-new <change-name>
 /ah-propose <change-name>
 /ah-discuss <change-name>
 /ah-execute <change-name>
@@ -166,6 +175,17 @@ ls .autoharness
 ```
 
 然后重启 `claude` 或 `codex`。
+
+### Q1.1：`<change-name>` 应该怎么写？
+
+统一使用这个格式：
+
+- `<全小写拼音>-YYYYMMDD`
+
+例如：
+
+- `yonghudenglu-20260420`
+- `dingdanliebiao-20260420`
 
 ### Q2：需要单独跑 `init` 吗？
 

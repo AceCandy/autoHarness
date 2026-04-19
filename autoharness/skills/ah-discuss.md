@@ -19,6 +19,22 @@ description: AutoHarness /ah-discuss 命令 — 需求澄清与范围确认
 
 打开 `.autoharness/changes/<name>/proposal.md`、`.autoharness/changes/<name>/design.md`、`.autoharness/changes/<name>/tasks.md`。
 
+如果存在 `.autoharness/changes/<name>/source/prd.md`，也一起读取，用于回看原始需求。
+
+再按需读取：
+
+- `.autoharness/project.md`
+- `.autoharness/knowledge/business.md`
+- `.autoharness/knowledge/rules.md`
+- `.autoharness/knowledge/decisions.md`
+- `.autoharness/specs/**/spec.md`
+
+读取原则：
+
+1. 只读取与当前变更直接相关的知识和规格
+2. 如果提案里已经标出冲突点，优先围绕这些冲突补齐范围和验收
+3. 不需要在 discuss 阶段通读全部规格库
+
 ### 2. 澄清 5 类问题
 
 1. 目标：这次改动真正要解决什么问题
@@ -66,8 +82,14 @@ description: AutoHarness /ah-discuss 命令 — 需求澄清与范围确认
 3. 可以开始执行的 `tasks.md`
 4. 下一步：`/ah-execute <name>`
 
+## 讨论重点
+
+- 如果 PRD、项目知识和现有规格不一致，必须在 `proposal.md` 或 `design.md` 里写明最终结论
+- 如果需要修改长期规格，记录到 `.autoharness/changes/<name>/specs/`
+
 ## 相关 Skills
 
+- `/ah-new` — 先保存 PRD 来源（前置）
 - `/ah-propose` — 创建变更提案（前置）
 - `/ah-execute` — 在范围确认后开始实现
 - `/ah-worktree` — 需要独立目录时先做隔离开发

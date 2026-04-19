@@ -9,6 +9,24 @@ description: AutoHarness /ah-verify 命令 — 统一验证与放行判断
 
 ## 工作流程
 
+### 0. 读取验证基线
+
+先读取以下内容：
+
+- `.autoharness/changes/<name>/proposal.md`
+- `.autoharness/changes/<name>/tasks.md`
+- `.autoharness/project.md`
+- `.autoharness/knowledge/business.md`
+- `.autoharness/knowledge/rules.md`
+- `.autoharness/knowledge/decisions.md`
+- 相关 `.autoharness/specs/**/spec.md`
+
+读取原则：
+
+1. 以当前变更最相关的规格和项目知识为基线
+2. 不需要为一次验证通读全部规格库
+3. 如果规格、知识和实现结论冲突，必须在验证报告中明确指出
+
 ### 1. 代码质量检查
 
 - 运行 lint
@@ -28,7 +46,7 @@ description: AutoHarness /ah-verify 命令 — 统一验证与放行判断
 
 ### 4. 规格与功能验证
 
-- 验证实现符合规格
+- 验证实现符合相关规格与项目知识
 - 对照验收标准逐项检查
 
 ### 5. 必要专项检查

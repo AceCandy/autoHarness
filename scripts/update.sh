@@ -191,6 +191,7 @@ echo "📁 公共文件:"
 mkdir -p ".autoharness"
 update_file "$AGENTS_TEMPLATE" "AGENTS.md" "$FORCE"
 remove_file ".autoharness/AGENTS.md"
+remove_dir ".autoharness/config"
 remove_dir ".autoharness/rules"
 remove_dir ".autoharness/skills"
 remove_dir ".autoharness/hooks"
@@ -212,22 +213,29 @@ else
   fi
 fi
 
-mkdir -p .autoharness/changes/archive .autoharness/specs
-
-for file in "$ASSET_DIR/config/"*.json; do
-  [ -f "$file" ] || continue
-  update_file "$file" ".autoharness/config/$(basename "$file")" "$FORCE"
-done
+mkdir -p .autoharness/changes/archive .autoharness/specs .autoharness/knowledge .autoharness/scripts
 
 for file in "$ASSET_DIR/workspace/"*.md; do
   [ -f "$file" ] || continue
   update_file "$file" ".autoharness/workspace/$(basename "$file")" "$FORCE"
 done
 
-for file in "$SCRIPT_SOURCE_DIR/"*.sh; do
+for file in "$ASSET_DIR/knowledge/"*.md; do
   [ -f "$file" ] || continue
-  update_file "$file" ".autoharness/scripts/$(basename "$file")" "$FORCE"
+  if [ ! -f ".autoharness/knowledge/$(basename "$file")" ]; then
+    update_file "$file" ".autoharness/knowledge/$(basename "$file")" "$FORCE"
+  elif [ "$FORCE" = true ]; then
+    update_file "$file" ".autoharness/knowledge/$(basename "$file")" true
+  else
+    echo "  ⏭️  跳过：.autoharness/knowledge/$(basename "$file") (保留用户自定义)"
+  fi
 done
+
+remove_file ".autoharness/scripts/install.sh"
+remove_file ".autoharness/scripts/update.sh"
+remove_file ".autoharness/scripts/init.sh"
+remove_file ".autoharness/scripts/uninstall.sh"
+update_file "$SCRIPT_SOURCE_DIR/archive-change.sh" ".autoharness/scripts/archive-change.sh" "$FORCE"
 
 for tool in "${INSTALLED_TOOLS[@]}"; do
   echo ""

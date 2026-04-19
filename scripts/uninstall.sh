@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # AutoHarness 卸载脚本
-# 用法: bash .autoharness/scripts/uninstall.sh [--force]
+# 用法: 在要卸载的项目根目录执行 bash /path/to/autoHarness/scripts/uninstall.sh [--force]
 
 set -e
 

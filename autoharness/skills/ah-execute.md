@@ -17,6 +17,16 @@ description: AutoHarness /ah-execute 命令 — 执行实现与推进任务
 - `.autoharness/changes/<name>/design.md`
 - `.autoharness/changes/<name>/tasks.md`
 - `.autoharness/project.md`
+- `.autoharness/knowledge/business.md`
+- `.autoharness/knowledge/rules.md`
+- `.autoharness/knowledge/decisions.md`
+- 相关 `.autoharness/specs/**/spec.md`
+
+读取原则：
+
+1. 优先读取与当前任务直接相关的知识和规格
+2. 如果 `design.md` 里已经列出关键决策或冲突点，优先按这些内容执行
+3. 不需要在实现前通读全部规格库
 
 ### 2. 生成最小执行顺序
 
@@ -37,6 +47,7 @@ description: AutoHarness /ah-execute 命令 — 执行实现与推进任务
 
 - 如果遇到阻塞型问题，记录到执行记录
 - 如果进入问题定位阶段，切换到 `/ah-debug`
+- 如果发现实现与已有 `specs` 或 `knowledge` 不一致，先回写 `design.md` / `tasks.md`，必要时回到 `/ah-discuss`
 
 ## 输出
 
