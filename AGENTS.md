@@ -33,8 +33,8 @@ AutoHarness uses a layered design where each layer can be enabled independently:
 ### Quick Install
 
 ```bash
-git clone https://github.com/vanrayliu/autoharness.git
-cd autoharness
+git clone https://github.com/AceCandy/autoHarness.git
+cd autoHarness
 bash scripts/install.sh claude
 bash scripts/install.sh codex
 bash scripts/install.sh all

@@ -18,17 +18,17 @@ AutoHarness 现在只公开 7 个命令，其中 6 个是主线命令，1 个是
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/vanrayliu/autoharness.git
+git clone https://github.com/AceCandy/autoHarness.git
 
 # 2. 进入你的项目目录
 cd your-project
 
 # 3. 安装到当前项目
-bash /path/to/autoharness/scripts/install.sh claude
+bash /path/to/autoHarness/scripts/install.sh claude
 # 或
-bash /path/to/autoharness/scripts/install.sh codex
+bash /path/to/autoHarness/scripts/install.sh codex
 # 或同时安装两个平台
-bash /path/to/autoharness/scripts/install.sh all
+bash /path/to/autoHarness/scripts/install.sh all
 ```
 
 这里的 `all` 仅表示 `Claude Code + Codex`。

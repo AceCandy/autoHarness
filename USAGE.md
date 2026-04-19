@@ -15,7 +15,7 @@
 ### 步骤 1：临时克隆仓库
 
 ```bash
-git clone https://github.com/vanrayliu/autoharness.git /tmp/autoharness
+git clone https://github.com/AceCandy/autoHarness.git /tmp/autoharness
 ```
 
 ### 步骤 2：进入你的项目目录
@@ -87,7 +87,7 @@ codex
 mkdir my-new-project
 cd my-new-project
 git init
-git clone https://github.com/vanrayliu/autoharness.git /tmp/autoharness
+git clone https://github.com/AceCandy/autoHarness.git /tmp/autoharness
 bash /tmp/autoharness/scripts/install.sh all
 ```
 
@@ -102,7 +102,7 @@ bash /tmp/autoharness/scripts/install.sh all
 如果你已经在 `Claude Code` 或 `Codex` 里工作，可以直接说：
 
 ```text
-请帮我安装 AutoHarness：https://github.com/vanrayliu/autoharness
+请帮我安装 AutoHarness：https://github.com/AceCandy/autoHarness
 ```
 
 或者：
@@ -180,7 +180,7 @@ ls .autoharness
 ### Q3：如何更新？
 
 ```bash
-git clone https://github.com/vanrayliu/autoharness.git /tmp/autoharness
+git clone https://github.com/AceCandy/autoHarness.git /tmp/autoharness
 bash /tmp/autoharness/scripts/update.sh
 ```
 

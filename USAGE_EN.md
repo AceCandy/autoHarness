@@ -15,7 +15,7 @@
 ### Step 1: Clone to a temporary directory
 
 ```bash
-git clone https://github.com/vanrayliu/autoharness.git /tmp/autoharness
+git clone https://github.com/AceCandy/autoHarness.git /tmp/autoharness
 ```
 
 ### Step 2: Enter your project directory
@@ -87,7 +87,7 @@ codex
 mkdir my-new-project
 cd my-new-project
 git init
-git clone https://github.com/vanrayliu/autoharness.git /tmp/autoharness
+git clone https://github.com/AceCandy/autoHarness.git /tmp/autoharness
 bash /tmp/autoharness/scripts/install.sh all
 ```
 
@@ -102,7 +102,7 @@ The install script already performs initialization. Then update:
 Inside `Claude Code` or `Codex`, you can say:
 
 ```text
-Please install AutoHarness: https://github.com/vanrayliu/autoharness
+Please install AutoHarness: https://github.com/AceCandy/autoHarness
 ```
 
 Or:
@@ -180,7 +180,7 @@ If you run install again:
 ### Q3: How do I update?
 
 ```bash
-git clone https://github.com/vanrayliu/autoharness.git /tmp/autoharness
+git clone https://github.com/AceCandy/autoHarness.git /tmp/autoharness
 bash /tmp/autoharness/scripts/update.sh
 ```
 

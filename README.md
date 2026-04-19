@@ -19,17 +19,17 @@ For step-by-step usage, see [USAGE.md](./USAGE.md) and [USAGE_EN.md](./USAGE_EN.
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/vanrayliu/autoharness.git
+git clone https://github.com/AceCandy/autoHarness.git
 
 # 2. Go to your project directory
 cd your-project
 
 # 3. Install AutoHarness into the current project
-bash /path/to/autoharness/scripts/install.sh claude
+bash /path/to/autoHarness/scripts/install.sh claude
 # or
-bash /path/to/autoharness/scripts/install.sh codex
+bash /path/to/autoHarness/scripts/install.sh codex
 # or install both
-bash /path/to/autoharness/scripts/install.sh all
+bash /path/to/autoHarness/scripts/install.sh all
 ```
 
 `all` means `Claude Code + Codex`.
