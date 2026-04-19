@@ -20,7 +20,6 @@
   "paths": {
     "specs_dir": ".autoharness/specs",
     "changes_dir": ".autoharness/changes",
-    "workspace_dir": ".autoharness/workspace",
-    "planning_dir": ".autoharness/.planning"
+    "workspace_dir": ".autoharness/workspace"
   }
 }

@@ -4,8 +4,6 @@
 # Runtime / workspace
 /.autoharness/workspace/journals/
 /.autoharness/workspace/tool-usage.log
-/.planning/CONTEXT.md
-/.planning/REQUIREMENTS.md
 /.current-task
 /.ralph-state.json
 

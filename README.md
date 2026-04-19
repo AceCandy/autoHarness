@@ -13,7 +13,7 @@ AutoHarness keeps the public workflow intentionally small. The command set is no
 - `/ah-worktree` (advanced)
 
 If you want the Chinese guide, see [README_zh.md](./README_zh.md).
-For step-by-step usage, see [USAGE.md](./USAGE.md) and [USAGE_EN.md](./USAGE_EN.md).
+For step-by-step usage, see [USAGE.md](./USAGE.md) and [USAGE_zh.md](./USAGE_zh.md).
 
 ## Quick Start
 
@@ -50,7 +50,7 @@ bash /path/to/autoHarness/scripts/install.sh all
 
 ## Installation
 
-### Recommended
+### Command Install Only
 
 ```bash
 bash scripts/install.sh claude
@@ -61,48 +61,13 @@ bash scripts/install.sh all
 
 Source assets live in `autoharness/`. Installed project assets still go into `.autoharness/`.
 
+Manual file copying is no longer supported. Install only through `scripts/install.sh`.
+
 Installed project layout is intentionally split:
 
-- `.autoharness/` keeps shared workflow assets such as `project.md`, `changes/`, `specs/`, `config/`, `workspace/`, `templates/`, and `.planning/`
+- `.autoharness/` keeps shared workflow assets such as `project.md`, `changes/`, `specs/`, `config/`, `workspace/`, and `scripts/`
 - `.claude/` keeps Claude-only runtime assets such as `skills/` and `hooks/`
 - `.codex/` stays minimal and uses root `AGENTS.md`
-
-### Manual Install for Claude Code
-
-```bash
-cp AGENTS.md your-project/
-mkdir -p your-project/.autoharness
-mkdir -p your-project/.autoharness/scripts
-cp autoharness/project.md your-project/.autoharness/
-cp -r autoharness/specs your-project/.autoharness/
-cp -r autoharness/changes your-project/.autoharness/
-cp -r autoharness/config your-project/.autoharness/
-cp -r autoharness/workspace your-project/.autoharness/
-cp -r autoharness/templates your-project/.autoharness/
-cp -r autoharness/.planning your-project/.autoharness/
-cp -r scripts/. your-project/.autoharness/scripts/
-printf '%s\n' '@AGENTS.md' > your-project/CLAUDE.md
-mkdir -p your-project/.claude/{skills,hooks}
-for skill in autoharness/skills/ah-*.md; do name=$(basename "$skill" .md); mkdir -p "your-project/.claude/skills/$name"; cp "$skill" "your-project/.claude/skills/$name/SKILL.md"; done
-cp autoharness/hooks/*.js your-project/.claude/hooks/
-```
-
-### Manual Install for Codex
-
-```bash
-cp AGENTS.md your-project/
-mkdir -p your-project/.autoharness
-mkdir -p your-project/.autoharness/scripts
-cp autoharness/project.md your-project/.autoharness/
-cp -r autoharness/specs your-project/.autoharness/
-cp -r autoharness/changes your-project/.autoharness/
-cp -r autoharness/config your-project/.autoharness/
-cp -r autoharness/workspace your-project/.autoharness/
-cp -r autoharness/templates your-project/.autoharness/
-cp -r autoharness/.planning your-project/.autoharness/
-cp -r scripts/. your-project/.autoharness/scripts/
-mkdir -p your-project/.codex
-```
 
 ## Verification
 
@@ -124,12 +89,12 @@ Then restart the tool you use.
 
 These are script actions triggered via natural language:
 
-| You say | Script |
-|---|---|
-| `Install AutoHarness` | `bash /path/to/autoHarness/scripts/install.sh` |
-| `Update AutoHarness` | `bash /path/to/autoHarness/scripts/update.sh --target your-project` |
-| `Preview update` | `bash /path/to/autoHarness/scripts/update.sh --target your-project --dry-run` |
-| `Force update` | `bash /path/to/autoHarness/scripts/update.sh --target your-project --force` |
+| You say               | Script                                                                        |
+| --------------------- | ----------------------------------------------------------------------------- |
+| `Install AutoHarness` | `bash /path/to/autoHarness/scripts/install.sh`                                |
+| `Update AutoHarness`  | `bash /path/to/autoHarness/scripts/update.sh --target your-project`           |
+| `Preview update`      | `bash /path/to/autoHarness/scripts/update.sh --target your-project --dry-run` |
+| `Force update`        | `bash /path/to/autoHarness/scripts/update.sh --target your-project --force`   |
 
 ## Core Commands
 
@@ -178,7 +143,6 @@ autoharness/
   changes/
   config/
   workspace/
-  templates/
   skills/
   hooks/
 ```
@@ -187,7 +151,7 @@ autoharness/
 
 - [README_zh.md](./README_zh.md)
 - [USAGE.md](./USAGE.md)
-- [USAGE_EN.md](./USAGE_EN.md)
+- [USAGE_zh.md](./USAGE_zh.md)
 - [QUICKREF.md](./QUICKREF.md)
 - [WORKFLOW.md](./WORKFLOW.md)
 

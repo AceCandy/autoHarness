@@ -1,53 +1,53 @@
-# AutoHarness 使用手册
+# AutoHarness User Guide
 
-> 当前版本只支持 `Claude Code` 和 `Codex`。
+> The current repository supports only `Claude Code` and `Codex`.
 
-## 目录
+## Contents
 
-1. 现有项目接入
-2. 新项目初始化
-3. 用 AI 助手安装
-4. 常用工作流
+1. Adopt in an existing project
+2. Start a new project
+3. Install through your AI assistant
+4. Common workflows
 5. FAQ
 
-## 1. 现有项目接入
+## 1. Adopt in an Existing Project
 
-### 步骤 1：临时克隆仓库
+### Step 1: Clone to a temporary directory
 
 ```bash
 git clone https://github.com/AceCandy/autoHarness.git /tmp/autoharness
 ```
 
-### 步骤 2：进入你的项目目录
+### Step 2: Enter your project directory
 
 ```bash
 cd /path/to/your-project
 ```
 
-### 步骤 3：执行安装
+### Step 3: Install
 
 ```bash
-# 自动检测 Claude Code / Codex 环境；检测不到时默认安装 Claude Code
+# Auto-detect Claude Code / Codex environment; default to Claude Code if unsure
 bash /tmp/autoharness/scripts/install.sh
 
-# 或显式指定
+# Or specify explicitly
 bash /tmp/autoharness/scripts/install.sh claude
 bash /tmp/autoharness/scripts/install.sh codex
 bash /tmp/autoharness/scripts/install.sh all
 ```
 
-### 步骤 4：检查安装结果
+### Step 4: Verify
 
 ```bash
 ls -la
 ```
 
-你至少会看到这些核心文件：
+Core project files installed by AutoHarness:
 
 - `.autoharness/`
 - `AGENTS.md`
 
-如果安装了 Claude Code，还应该看到：
+For Claude Code:
 
 ```bash
 ls .claude
@@ -55,7 +55,7 @@ ls CLAUDE.md
 ls .autoharness
 ```
 
-如果安装了 Codex，还应该看到：
+For Codex:
 
 ```bash
 ls .codex
@@ -63,25 +63,25 @@ ls AGENTS.md
 ls .autoharness
 ```
 
-### 步骤 5：填写项目上下文
+### Step 5: Fill in `.autoharness/project.md`
 
-编辑 `.autoharness/project.md`，填入技术栈、架构、业务背景、约束和规范。
+Document the tech stack, architecture, domain context, constraints, and conventions.
 
-### 步骤 6：重启工具
+### Step 6: Restart your tool
 
 ```bash
 claude
-# 或
+# or
 codex
 ```
 
-### 步骤 7：测试命令
+### Step 7: Try a command
 
 ```text
 /ah-propose test-feature
 ```
 
-## 2. 新项目初始化
+## 2. Start a New Project
 
 ```bash
 mkdir my-new-project
@@ -91,61 +91,61 @@ git clone https://github.com/AceCandy/autoHarness.git /tmp/autoharness
 bash /tmp/autoharness/scripts/install.sh all
 ```
 
-安装脚本已经同时完成初始化。安装后建议立刻补全：
+The install script already performs initialization. Then update:
 
 - `.autoharness/project.md`
 - `.autoharness/workspace/STATE.md`
 - `.autoharness/workspace/ROADMAP.md`
 
-## 3. 用 AI 助手安装
+## 3. Install Through Your AI Assistant
 
-如果你已经在 `Claude Code` 或 `Codex` 里工作，可以直接说：
+Inside `Claude Code` or `Codex`, you can say:
 
 ```text
-请帮我安装 AutoHarness：https://github.com/AceCandy/autoHarness
+Please install AutoHarness: https://github.com/AceCandy/autoHarness
 ```
 
-或者：
+Or:
 
 ```text
-请帮我把 AutoHarness 安装到 /path/to/my-project
+Please install AutoHarness to /path/to/my-project
 ```
 
-如果你要明确指定平台，可以说：
+Platform-specific requests:
 
 ```text
-我是 Claude Code 用户，帮我安装 AutoHarness
-```
-
-```text
-我是 Codex 用户，帮我安装 AutoHarness
+I use Claude Code, please install AutoHarness
 ```
 
 ```text
-同时为 Claude Code 和 Codex 安装 AutoHarness
+I use Codex, please install AutoHarness
 ```
 
-## 4. 常用工作流
+```text
+Install AutoHarness for both Claude Code and Codex
+```
 
-### 标准功能开发
+## 4. Common Workflows
+
+### Feature development
 
 ```text
 /ah-propose <change-name>
 /ah-discuss <change-name>
 /ah-execute <change-name>
 /ah-verify <change-name>
-/ah-ship <change-name>   # 可选
+/ah-ship <change-name>   # optional
 ```
 
-### 问题修复
+### Bug fixing
 
 ```text
 /ah-debug <issue>
 /ah-verify <change-name>
-/ah-ship <change-name>   # 可选
+/ah-ship <change-name>   # optional
 ```
 
-### 本地隔离开发
+### Local isolated development
 
 ```text
 /ah-worktree <change-name>
@@ -153,9 +153,9 @@ bash /tmp/autoharness/scripts/install.sh all
 
 ## 5. FAQ
 
-### Q1：安装后看不到 `/ah-*` 命令怎么办？
+### Q1: I cannot see `/ah-*` commands after installation
 
-先检查平台目录和入口文件：
+Check the platform files first:
 
 ```bash
 ls .claude
@@ -165,34 +165,34 @@ ls AGENTS.md
 ls .autoharness
 ```
 
-然后重启 `claude` 或 `codex`。
+Then restart `claude` or `codex`.
 
-### Q2：需要单独跑 `init` 吗？
+### Q2: Do I need to run `init` separately?
 
-不需要。`install` 已经接管初始化逻辑。
+No. `install` already includes initialization.
 
-如果你重复执行安装脚本：
+If you run install again:
 
-- 会补齐缺失的 AutoHarness 资产
-- 不会默认重置你的项目内容
-- 后续升级应优先使用 `update`
+- it fills in missing AutoHarness assets
+- it does not reset project content by default
+- use `update` for normal upgrades
 
-### Q3：如何更新？
+### Q3: How do I update?
 
 ```bash
 git clone https://github.com/AceCandy/autoHarness.git /tmp/autoharness
 bash /tmp/autoharness/scripts/update.sh
 ```
 
-预览更新：
+Preview only:
 
 ```bash
 bash /tmp/autoharness/scripts/update.sh --dry-run
 ```
 
-### Q4：如果我真想移除 AutoHarness 怎么办？
+### Q4: How do I remove AutoHarness if I really want to?
 
-通常不需要专门卸载命令。直接删除这些内容即可：
+Usually you do not need a dedicated uninstall command. Remove these items directly:
 
 - `.autoharness/`
 - `AGENTS.md`
@@ -200,18 +200,18 @@ bash /tmp/autoharness/scripts/update.sh --dry-run
 - `.claude/`
 - `.codex/`
 
-不会影响你的业务代码目录。
+This does not remove your product code.
 
-### Q5：现在支持哪些平台？
+### Q5: Which platforms are supported now?
 
-只支持两种：
+Only these two:
 
 - `Claude Code`
 - `Codex`
 
-### Q6：如何在多个项目中使用？
+### Q6: How do I use AutoHarness in multiple projects?
 
-每个项目独立安装一次：
+Install it once per project:
 
 ```bash
 cd /path/to/project-a
@@ -221,7 +221,7 @@ cd /path/to/project-b
 bash /tmp/autoharness/scripts/install.sh codex
 ```
 
-### Q7：如何备份？
+### Q7: How do I back up configuration?
 
 ```bash
 tar -czf autoharness-backup.tar.gz \

@@ -116,7 +116,7 @@ rm -f ".autoharness/AGENTS.md"
 rm -rf ".autoharness/rules" ".autoharness/skills" ".autoharness/hooks" ".autoharness/lib"
 
 if [ "$ASSET_SELF" = false ]; then
-  for dir in specs changes config workspace templates .planning; do
+  for dir in specs changes config workspace; do
     if [ -d "$ASSET_DIR/$dir" ]; then
       cp -rn "$ASSET_DIR/$dir" ".autoharness/" 2>/dev/null || true
     fi
@@ -127,7 +127,7 @@ if [ -d "$SCRIPT_SOURCE_DIR" ] && [ "$SOURCE_SCRIPT_DIR" != "$TARGET_SCRIPT_DIR"
   cp -rn "$SCRIPT_SOURCE_DIR/"* ".autoharness/scripts/" 2>/dev/null || true
 fi
 
-mkdir -p .autoharness/changes/archive .autoharness/.planning
+mkdir -p .autoharness/changes/archive
 
 for tool in "${TOOLS[@]}"; do
   case "$tool" in

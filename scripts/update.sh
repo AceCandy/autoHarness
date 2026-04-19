@@ -212,7 +212,7 @@ else
   fi
 fi
 
-mkdir -p .autoharness/changes/archive .autoharness/specs .autoharness/.planning
+mkdir -p .autoharness/changes/archive .autoharness/specs
 
 for file in "$ASSET_DIR/config/"*.json; do
   [ -f "$file" ] || continue
@@ -222,11 +222,6 @@ done
 for file in "$ASSET_DIR/workspace/"*.md; do
   [ -f "$file" ] || continue
   update_file "$file" ".autoharness/workspace/$(basename "$file")" "$FORCE"
-done
-
-for file in "$ASSET_DIR/templates/"*.md; do
-  [ -f "$file" ] || continue
-  update_file "$file" ".autoharness/templates/$(basename "$file")" "$FORCE"
 done
 
 for file in "$SCRIPT_SOURCE_DIR/"*.sh; do

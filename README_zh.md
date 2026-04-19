@@ -12,7 +12,7 @@ AutoHarness 现在只公开 7 个命令，其中 6 个是主线命令，1 个是
 - `/ah-ship`
 - `/ah-worktree`（高级）
 
-英文说明见 [README.md](./README.md)。详细使用手册见 [USAGE.md](./USAGE.md) 和 [USAGE_EN.md](./USAGE_EN.md)。
+英文说明见 [README.md](./README.md)。详细使用手册见 [USAGE_zh.md](./USAGE_zh.md) 和 [USAGE.md](./USAGE.md)。
 
 ## 快速开始
 
@@ -49,7 +49,7 @@ bash /path/to/autoHarness/scripts/install.sh all
 
 ## 安装方式
 
-### 推荐脚本安装
+### 仅支持命令安装
 
 ```bash
 bash scripts/install.sh claude
@@ -60,48 +60,13 @@ bash scripts/install.sh all
 
 源码仓库内部资源目录是 `autoharness/`，安装到目标项目后仍然写入 `.autoharness/`。
 
+不再支持手动复制文件安装，只支持通过 `scripts/install.sh` 安装。
+
 安装后的项目目录会按职责拆开：
 
-- `.autoharness/` 只保留共享工作流资产，如 `project.md`、`changes/`、`specs/`、`config/`、`workspace/`、`templates/`、`.planning/`
+- `.autoharness/` 只保留共享工作流资产，如 `project.md`、`changes/`、`specs/`、`config/`、`workspace/`、`scripts/`
 - `.claude/` 只保留 Claude 专属运行时资产，如 `skills/`、`hooks/`
 - `.codex/` 保持最小化，只配合根目录 `AGENTS.md` 使用
-
-### Claude Code 手动安装
-
-```bash
-cp AGENTS.md your-project/
-mkdir -p your-project/.autoharness
-mkdir -p your-project/.autoharness/scripts
-cp autoharness/project.md your-project/.autoharness/
-cp -r autoharness/specs your-project/.autoharness/
-cp -r autoharness/changes your-project/.autoharness/
-cp -r autoharness/config your-project/.autoharness/
-cp -r autoharness/workspace your-project/.autoharness/
-cp -r autoharness/templates your-project/.autoharness/
-cp -r autoharness/.planning your-project/.autoharness/
-cp -r scripts/. your-project/.autoharness/scripts/
-printf '%s\n' '@AGENTS.md' > your-project/CLAUDE.md
-mkdir -p your-project/.claude/{skills,hooks}
-for skill in autoharness/skills/ah-*.md; do name=$(basename "$skill" .md); mkdir -p "your-project/.claude/skills/$name"; cp "$skill" "your-project/.claude/skills/$name/SKILL.md"; done
-cp autoharness/hooks/*.js your-project/.claude/hooks/
-```
-
-### Codex 手动安装
-
-```bash
-cp AGENTS.md your-project/
-mkdir -p your-project/.autoharness
-mkdir -p your-project/.autoharness/scripts
-cp autoharness/project.md your-project/.autoharness/
-cp -r autoharness/specs your-project/.autoharness/
-cp -r autoharness/changes your-project/.autoharness/
-cp -r autoharness/config your-project/.autoharness/
-cp -r autoharness/workspace your-project/.autoharness/
-cp -r autoharness/templates your-project/.autoharness/
-cp -r autoharness/.planning your-project/.autoharness/
-cp -r scripts/. your-project/.autoharness/scripts/
-mkdir -p your-project/.codex
-```
 
 ## 安装后检查
 
@@ -121,12 +86,12 @@ ls your-project/.autoharness
 
 ## 自然语言触发的脚本命令
 
-| 你说 | 实际脚本 |
-|---|---|
-| `Install AutoHarness` | `bash /path/to/autoHarness/scripts/install.sh` |
-| `Update AutoHarness` | `bash /path/to/autoHarness/scripts/update.sh --target your-project` |
-| `Preview update` | `bash /path/to/autoHarness/scripts/update.sh --target your-project --dry-run` |
-| `Force update` | `bash /path/to/autoHarness/scripts/update.sh --target your-project --force` |
+| 你说                  | 实际脚本                                                                      |
+| --------------------- | ----------------------------------------------------------------------------- |
+| `Install AutoHarness` | `bash /path/to/autoHarness/scripts/install.sh`                                |
+| `Update AutoHarness`  | `bash /path/to/autoHarness/scripts/update.sh --target your-project`           |
+| `Preview update`      | `bash /path/to/autoHarness/scripts/update.sh --target your-project --dry-run` |
+| `Force update`        | `bash /path/to/autoHarness/scripts/update.sh --target your-project --force`   |
 
 ## 核心命令
 
@@ -175,7 +140,6 @@ autoharness/
   changes/
   config/
   workspace/
-  templates/
   skills/
   hooks/
 ```
@@ -184,7 +148,7 @@ autoharness/
 
 - [README.md](./README.md)
 - [USAGE.md](./USAGE.md)
-- [USAGE_EN.md](./USAGE_EN.md)
+- [USAGE_zh.md](./USAGE_zh.md)
 - [QUICKREF.md](./QUICKREF.md)
 - [WORKFLOW.md](./WORKFLOW.md)
 
