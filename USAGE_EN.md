@@ -27,7 +27,7 @@ cd /path/to/your-project
 ### Step 3: Install
 
 ```bash
-# Auto-detect Claude Code / Codex environment
+# Auto-detect Claude Code / Codex environment; default to Claude Code if unsure
 bash /tmp/autoharness/scripts/install.sh
 
 # Or specify explicitly

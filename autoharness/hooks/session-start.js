@@ -2,19 +2,18 @@
 
 /**
  * Session Start Hook
- * 轻量版：只做基础初始化，不尝试加载大量文件
+ * 轻量版：只做上下文存在性提示
  */
 
 try {
   const fs = require('fs');
   const path = require('path');
 
-  const HARNESS_DIR = process.env.CLAUDE_PROJECT_DIR || __dirname;
+  const projectRoot = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 
-  // 简单检查关键文件是否存在
   const checkFile = (file) => {
     try {
-      return fs.existsSync(path.join(HARNESS_DIR, file));
+      return fs.existsSync(path.join(projectRoot, file));
     } catch {
       return false;
     }
@@ -24,7 +23,7 @@ try {
   const hasWorkspace = checkFile('.autoharness/workspace');
 
   if (hasProject || hasWorkspace) {
-    console.log('[AutoHarness] Session started with project context');
+    console.log('[AutoHarness] 已检测到项目上下文');
   }
 
   process.exit(0);

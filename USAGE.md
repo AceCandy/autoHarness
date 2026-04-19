@@ -27,7 +27,7 @@ cd /path/to/your-project
 ### 步骤 3：执行安装
 
 ```bash
-# 自动检测 Claude Code / Codex 环境
+# 自动检测 Claude Code / Codex 环境；检测不到时默认安装 Claude Code
 bash /tmp/autoharness/scripts/install.sh
 
 # 或显式指定

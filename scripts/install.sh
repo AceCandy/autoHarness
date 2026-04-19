@@ -7,7 +7,7 @@
 #   bash scripts/install.sh claude --target dir       # 安装到指定目录
 #   bash scripts/install.sh claude codex              # 安装两个支持的平台
 #   bash scripts/install.sh all                       # 安装 Claude Code 和 Codex
-#   bash scripts/install.sh                           # 自动检测当前 CLI 并安装
+#   bash scripts/install.sh                           # 自动检测当前 CLI；检测不到时默认安装 claude
 
 set -e
 
@@ -66,8 +66,8 @@ if [ ${#TOOLS[@]} -eq 0 ]; then
     TOOLS=(codex)
     echo "🔍 检测到 Codex 环境"
   else
-    TOOLS=(claude codex)
-    echo "🔍 未检测到特定 CLI 环境，安装到 claude 和 codex"
+    TOOLS=(claude)
+    echo "🔍 未检测到特定 CLI 环境，默认安装到 claude"
   fi
 fi
 
@@ -110,14 +110,13 @@ if [ -d "$SCRIPT_SOURCE_DIR" ]; then
   SOURCE_SCRIPT_DIR="$(cd "$SCRIPT_SOURCE_DIR" && pwd)"
 fi
 
-if [ "$ASSET_SELF" = false ]; then
-  cp "$AGENTS_TEMPLATE" ".autoharness/AGENTS.md"
-fi
 [ ! -f "AGENTS.md" ] && cp "$AGENTS_TEMPLATE" .
 [ ! -f ".autoharness/project.md" ] && [ "$ASSET_SELF" = false ] && cp "$ASSET_DIR/project.md" ".autoharness/project.md"
+rm -f ".autoharness/AGENTS.md"
+rm -rf ".autoharness/rules" ".autoharness/skills" ".autoharness/hooks" ".autoharness/lib"
 
 if [ "$ASSET_SELF" = false ]; then
-  for dir in specs changes config workspace templates rules skills hooks lib .planning; do
+  for dir in specs changes config workspace templates .planning; do
     if [ -d "$ASSET_DIR/$dir" ]; then
       cp -rn "$ASSET_DIR/$dir" ".autoharness/" 2>/dev/null || true
     fi
@@ -136,14 +135,15 @@ for tool in "${TOOLS[@]}"; do
       echo ""
       echo "🔧 安装到 Claude Code..."
 
-      mkdir -p .claude/{rules,skills,hooks}
+      mkdir -p .claude/{skills,hooks}
+      rm -rf .claude/rules .claude/lib
 
       if [ -f "CLAUDE.md" ]; then
         BAK_FILE="CLAUDE.md.bak.$(date +%Y%m%d_%H%M%S)"
         cp CLAUDE.md "$BAK_FILE"
         echo "  📦 备份: CLAUDE.md -> $BAK_FILE"
       fi
-      cp "$AGENTS_TEMPLATE" CLAUDE.md
+      printf '%s\n' '@AGENTS.md' > CLAUDE.md
       echo "  ✅ CLAUDE.md 已创建/更新"
 
       rm -f .claude/skills/*.md 2>/dev/null || true
@@ -157,19 +157,6 @@ for tool in "${TOOLS[@]}"; do
         cp "$skill_file" ".claude/skills/$name/SKILL.md"
         echo "  ✅ command: $name"
       done
-
-      for rule in "$ASSET_DIR/rules/"*.md; do
-        [ -f "$rule" ] || continue
-        if [ ! -f ".claude/rules/$(basename "$rule")" ]; then
-          cp "$rule" ".claude/rules/"
-          echo "  ✅ rule: $(basename "$rule")"
-        fi
-      done
-
-      if [ -d "$ASSET_DIR/lib" ]; then
-        cp -rn "$ASSET_DIR/lib" ".claude/" 2>/dev/null || true
-        echo "  ✅ lib/ 支持库已复制"
-      fi
 
       for hook in "$ASSET_DIR/hooks/"*.js; do
         [ -f "$hook" ] || continue
@@ -245,7 +232,7 @@ echo "已安装到: $TARGET"
 echo "已启用工具: ${TOOLS[*]}"
 echo ""
 echo "当前项目结构:"
-echo "  - 根目录: AGENTS.md / CLAUDE.md / .claude / .codex"
+echo "  - 根目录: AGENTS.md / 可选 CLAUDE.md / .claude / .codex"
 echo "  - 内部资产: .autoharness/"
 echo ""
 echo "下一步:"

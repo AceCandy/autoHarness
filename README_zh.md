@@ -60,17 +60,29 @@ bash scripts/install.sh all
 
 源码仓库内部资源目录是 `autoharness/`，安装到目标项目后仍然写入 `.autoharness/`。
 
+安装后的项目目录会按职责拆开：
+
+- `.autoharness/` 只保留共享工作流资产，如 `project.md`、`changes/`、`specs/`、`config/`、`workspace/`、`templates/`、`.planning/`
+- `.claude/` 只保留 Claude 专属运行时资产，如 `skills/`、`hooks/`
+- `.codex/` 保持最小化，只配合根目录 `AGENTS.md` 使用
+
 ### Claude Code 手动安装
 
 ```bash
-cp AGENTS.md your-project/CLAUDE.md
+cp AGENTS.md your-project/
 mkdir -p your-project/.autoharness
 mkdir -p your-project/.autoharness/scripts
-cp AGENTS.md your-project/.autoharness/AGENTS.md
-cp -r autoharness/. your-project/.autoharness/
+cp autoharness/project.md your-project/.autoharness/
+cp -r autoharness/specs your-project/.autoharness/
+cp -r autoharness/changes your-project/.autoharness/
+cp -r autoharness/config your-project/.autoharness/
+cp -r autoharness/workspace your-project/.autoharness/
+cp -r autoharness/templates your-project/.autoharness/
+cp -r autoharness/.planning your-project/.autoharness/
 cp -r scripts/. your-project/.autoharness/scripts/
-mkdir -p your-project/.claude/{rules,skills,hooks}
-cp -r autoharness/rules/. your-project/.claude/rules/
+printf '%s\n' '@AGENTS.md' > your-project/CLAUDE.md
+mkdir -p your-project/.claude/{skills,hooks}
+for skill in autoharness/skills/ah-*.md; do name=$(basename "$skill" .md); mkdir -p "your-project/.claude/skills/$name"; cp "$skill" "your-project/.claude/skills/$name/SKILL.md"; done
 cp autoharness/hooks/*.js your-project/.claude/hooks/
 ```
 
@@ -80,8 +92,13 @@ cp autoharness/hooks/*.js your-project/.claude/hooks/
 cp AGENTS.md your-project/
 mkdir -p your-project/.autoharness
 mkdir -p your-project/.autoharness/scripts
-cp AGENTS.md your-project/.autoharness/AGENTS.md
-cp -r autoharness/. your-project/.autoharness/
+cp autoharness/project.md your-project/.autoharness/
+cp -r autoharness/specs your-project/.autoharness/
+cp -r autoharness/changes your-project/.autoharness/
+cp -r autoharness/config your-project/.autoharness/
+cp -r autoharness/workspace your-project/.autoharness/
+cp -r autoharness/templates your-project/.autoharness/
+cp -r autoharness/.planning your-project/.autoharness/
 cp -r scripts/. your-project/.autoharness/scripts/
 mkdir -p your-project/.codex
 ```
@@ -107,9 +124,9 @@ ls your-project/.autoharness
 | 你说 | 实际脚本 |
 |---|---|
 | `Install AutoHarness` | `bash /path/to/autoHarness/scripts/install.sh` |
-| `Update AutoHarness` | `bash .autoharness/scripts/update.sh` |
-| `Preview update` | `bash .autoharness/scripts/update.sh --dry-run` |
-| `Force update` | `bash .autoharness/scripts/update.sh --force` |
+| `Update AutoHarness` | `bash /path/to/autoHarness/scripts/update.sh --target your-project` |
+| `Preview update` | `bash /path/to/autoHarness/scripts/update.sh --target your-project --dry-run` |
+| `Force update` | `bash /path/to/autoHarness/scripts/update.sh --target your-project --force` |
 
 ## 核心命令
 
@@ -143,7 +160,7 @@ AutoHarness 保留五层结构：
 
 1. `Spec`：需求与变更规格
 2. `Skills`：按阶段划分的工作流命令
-3. `Enhancement`：规则、hooks、验证、记忆
+3. `Enhancement`：hooks、验证、记忆
 4. `Execution`：实现与交付流程
 5. `Workspace`：文件化项目记忆
 
@@ -159,10 +176,8 @@ autoharness/
   config/
   workspace/
   templates/
-  rules/
   skills/
   hooks/
-  lib/
 ```
 
 ## 相关文档

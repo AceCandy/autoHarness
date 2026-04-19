@@ -61,17 +61,29 @@ bash scripts/install.sh all
 
 Source assets live in `autoharness/`. Installed project assets still go into `.autoharness/`.
 
+Installed project layout is intentionally split:
+
+- `.autoharness/` keeps shared workflow assets such as `project.md`, `changes/`, `specs/`, `config/`, `workspace/`, `templates/`, and `.planning/`
+- `.claude/` keeps Claude-only runtime assets such as `skills/` and `hooks/`
+- `.codex/` stays minimal and uses root `AGENTS.md`
+
 ### Manual Install for Claude Code
 
 ```bash
-cp AGENTS.md your-project/CLAUDE.md
+cp AGENTS.md your-project/
 mkdir -p your-project/.autoharness
 mkdir -p your-project/.autoharness/scripts
-cp AGENTS.md your-project/.autoharness/AGENTS.md
-cp -r autoharness/. your-project/.autoharness/
+cp autoharness/project.md your-project/.autoharness/
+cp -r autoharness/specs your-project/.autoharness/
+cp -r autoharness/changes your-project/.autoharness/
+cp -r autoharness/config your-project/.autoharness/
+cp -r autoharness/workspace your-project/.autoharness/
+cp -r autoharness/templates your-project/.autoharness/
+cp -r autoharness/.planning your-project/.autoharness/
 cp -r scripts/. your-project/.autoharness/scripts/
-mkdir -p your-project/.claude/{rules,skills,hooks}
-cp -r autoharness/rules/. your-project/.claude/rules/
+printf '%s\n' '@AGENTS.md' > your-project/CLAUDE.md
+mkdir -p your-project/.claude/{skills,hooks}
+for skill in autoharness/skills/ah-*.md; do name=$(basename "$skill" .md); mkdir -p "your-project/.claude/skills/$name"; cp "$skill" "your-project/.claude/skills/$name/SKILL.md"; done
 cp autoharness/hooks/*.js your-project/.claude/hooks/
 ```
 
@@ -81,8 +93,13 @@ cp autoharness/hooks/*.js your-project/.claude/hooks/
 cp AGENTS.md your-project/
 mkdir -p your-project/.autoharness
 mkdir -p your-project/.autoharness/scripts
-cp AGENTS.md your-project/.autoharness/AGENTS.md
-cp -r autoharness/. your-project/.autoharness/
+cp autoharness/project.md your-project/.autoharness/
+cp -r autoharness/specs your-project/.autoharness/
+cp -r autoharness/changes your-project/.autoharness/
+cp -r autoharness/config your-project/.autoharness/
+cp -r autoharness/workspace your-project/.autoharness/
+cp -r autoharness/templates your-project/.autoharness/
+cp -r autoharness/.planning your-project/.autoharness/
 cp -r scripts/. your-project/.autoharness/scripts/
 mkdir -p your-project/.codex
 ```
@@ -110,9 +127,9 @@ These are script actions triggered via natural language:
 | You say | Script |
 |---|---|
 | `Install AutoHarness` | `bash /path/to/autoHarness/scripts/install.sh` |
-| `Update AutoHarness` | `bash .autoharness/scripts/update.sh` |
-| `Preview update` | `bash .autoharness/scripts/update.sh --dry-run` |
-| `Force update` | `bash .autoharness/scripts/update.sh --force` |
+| `Update AutoHarness` | `bash /path/to/autoHarness/scripts/update.sh --target your-project` |
+| `Preview update` | `bash /path/to/autoHarness/scripts/update.sh --target your-project --dry-run` |
+| `Force update` | `bash /path/to/autoHarness/scripts/update.sh --target your-project --force` |
 
 ## Core Commands
 
@@ -146,7 +163,7 @@ AutoHarness keeps the same five-layer structure:
 
 1. `Spec` - requirements and change specs
 2. `Skills` - stage-based workflow commands
-3. `Enhancement` - rules, hooks, verification, memory
+3. `Enhancement` - hooks, verification, memory
 4. `Execution` - implementation and delivery flow
 5. `Workspace` - file-based project memory
 
@@ -162,10 +179,8 @@ autoharness/
   config/
   workspace/
   templates/
-  rules/
   skills/
   hooks/
-  lib/
 ```
 
 ## Related Docs

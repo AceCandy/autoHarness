@@ -11,7 +11,6 @@ try {
   const tool = input.tool;
   const args = input.input || {};
 
-  // 密钥检测
   const secretPatterns = [
     /sk-[a-zA-Z0-9]{20,}/,
     /ghp_[a-zA-Z0-9]{36}/,
@@ -19,11 +18,16 @@ try {
     /-----BEGIN (RSA |EC )?PRIVATE KEY-----/,
   ];
 
+  let warned = false;
+
   const checkSecrets = (obj) => {
     if (typeof obj === 'string') {
       for (const pattern of secretPatterns) {
         if (pattern.test(obj)) {
-          console.error('[AutoHarness] Security: Potential secret detected');
+          if (!warned) {
+            console.error('[AutoHarness] 安全提醒：检测到疑似密钥或私钥内容');
+            warned = true;
+          }
         }
       }
     } else if (typeof obj === 'object' && obj !== null) {
@@ -33,11 +37,10 @@ try {
 
   checkSecrets(args);
 
-  // Git 安全检查
   if (tool === 'Bash') {
     const command = args.command || '';
     if (command.includes('--no-verify')) {
-      console.error('[AutoHarness] Security: --no-verify flag not allowed');
+      console.error('[AutoHarness] 安全提醒：检测到 --no-verify，请确认是否真的需要跳过校验');
     }
   }
 

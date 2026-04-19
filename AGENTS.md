@@ -1,124 +1,37 @@
-# AutoHarness — Unified AI Coding Harness
-
-> A focused, stage-based engineering framework combining OpenSpec, Superpowers, GSD, ECC, and Trellis.
-
-## Architecture
-
-AutoHarness uses a layered design where each layer can be enabled independently:
+## 工作流总览
 
 ```text
-┌─────────────────────────────────────────────────┐
-│  Layer 5: Workspace  — Project Memory           │
-├─────────────────────────────────────────────────┤
-│  Layer 4: Execution — Delivery Flow             │
-├─────────────────────────────────────────────────┤
-│  Layer 3: Enhancement — Rules / Hooks / Verify  │
-├─────────────────────────────────────────────────┤
-│  Layer 2: Skills — Stage Commands               │
-├─────────────────────────────────────────────────┤
-│  Layer 1: Spec — Spec-Driven Development        │
-└─────────────────────────────────────────────────┘
-```
-
-## Core Principles
-
-1. **Spec First** — Align on requirements before writing code
-2. **Stage Clarity** — Each command owns one stage of the workflow
-3. **Context Hygiene** — Keep tasks small and information structured
-4. **Unified Verification** — Run one verification gate instead of many scattered checks
-5. **Project Memory** — Persist important decisions in files
-
-## Installation
-
-### Quick Install
-
-```bash
-git clone https://github.com/AceCandy/autoHarness.git
-cd autoHarness
-bash scripts/install.sh claude
-bash scripts/install.sh codex
-bash scripts/install.sh all
-```
-
-Source assets live in `autoharness/`. Installed project assets still go into `.autoharness/`.
-
-### Claude Code
-
-```bash
-cp AGENTS.md your-project/CLAUDE.md
-mkdir -p your-project/.autoharness
-mkdir -p your-project/.autoharness/scripts
-mkdir -p your-project/.claude/{rules,skills,hooks}
-cp AGENTS.md your-project/.autoharness/AGENTS.md
-cp -r autoharness/. your-project/.autoharness/
-cp -r scripts/. your-project/.autoharness/scripts/
-cp -r autoharness/rules/. your-project/.claude/rules/
-cp autoharness/hooks/*.js your-project/.claude/hooks/
-bash scripts/install.sh claude your-project/
-```
-
-### Codex
-
-```bash
-cp AGENTS.md your-project/
-mkdir -p your-project/.autoharness
-mkdir -p your-project/.autoharness/scripts
-cp AGENTS.md your-project/.autoharness/AGENTS.md
-cp -r autoharness/. your-project/.autoharness/
-cp -r scripts/. your-project/.autoharness/scripts/
-mkdir -p your-project/.codex
-bash scripts/install.sh codex your-project/
-```
-
-## Quick Start
-
-### Natural Language Commands
-
-You can use natural language to trigger these actions:
-
-| You say | AI executes |
-|---------|-------------|
-| "Install AutoHarness" | `bash /path/to/autoHarness/scripts/install.sh` |
-| "Update AutoHarness" | `bash .autoharness/scripts/update.sh` |
-| "I want to add a feature" | `/ah-propose <name>` |
-| "Discuss requirements" | `/ah-discuss <name>` |
-| "Start implementation" | `/ah-execute <name>` |
-| "Check readiness" | `/ah-verify <name>` |
-| "Ship this" | `/ah-ship <name>` |
-| "Debug this bug" | `/ah-debug <issue>` |
-| "Use a separate branch" | `/ah-worktree <name>` |
-
-### Workflow Commands
-
-```text
-/ah-propose <name>      → Create change proposal
-/ah-discuss <name>      → Clarify scope and acceptance
-/ah-execute <name>      → Implement confirmed work
-/ah-debug <issue>        → Reproduce and fix defects
-/ah-verify <name>       → Run unified verification
-/ah-ship <name>         → Commit or deliver verified work
-/ah-worktree <name>     → Create isolated worktree
-```
-
-## Default Flow
-
-```text
-Feature flow:
+功能开发：
 /ah-propose -> /ah-discuss -> /ah-execute -> /ah-verify -> /ah-ship
 
-Bug flow:
+问题修复：
 /ah-debug -> /ah-verify -> /ah-ship
+
+需要隔离开发时：
++ /ah-worktree
 ```
 
-## Script Commands
+## 阶段切换规则
 
-| You say | Script |
-|---------|--------|
-| "Install AutoHarness" | `bash /path/to/autoHarness/scripts/install.sh` |
-| "Update AutoHarness" | `bash .autoharness/scripts/update.sh` |
-| "Preview update" | `bash .autoharness/scripts/update.sh --dry-run` |
-| "Force update" | `bash .autoharness/scripts/update.sh --force` |
+1. 需求未对齐时，先走 `/ah-discuss`，不要直接进入 `/ah-execute`。
+2. 新功能和较大改动，默认从 `/ah-propose` 开始。
+3. 已有明确问题时，优先走 `/ah-debug`，不要把修 bug 混成新功能流程。
+4. `/ah-verify` 是统一验证入口；实现完成后先验证，再决定是否交付。
+5. `/ah-ship` 只消费验证结果，不替代 `/ah-verify`。
+6. `/ah-worktree` 是可选的高级入口，只在需要隔离目录或分支时使用。
 
-## License
+## 默认执行约束
 
-MIT
+1. 代码修改默认遵循简洁优先：命名清晰、单函数单一职责、优先早返回、避免超过 3 层嵌套，不做无必要抽象。
+2. 变更应优先保证正确性和可维护性：边界条件、错误路径和需求完整性需要一起检查，不能只让主流程跑通。
+3. 错误处理不能静默吞掉；错误信息应具体，边界处应显式处理失败情况。
+4. 涉及代码改动时，默认补对应测试或验证；如果当前无法补齐，需要明确说明缺口。
+5. 不提交密钥、密码、Token 或其他敏感信息；所有外部输入默认需要校验，并警惕命令、SQL、HTML 等注入风险。
+6. 需要交付时，提交应保持单一逻辑单元；提交前至少确认无调试残留、无敏感信息、验证已完成。
+
+## 运行原则
+
+1. 默认先读取当前变更上下文，再决定下一步。
+2. 一个命令只负责一个阶段，不跨阶段混用。
+3. 重要状态、讨论结论和执行进度应写回文件，而不是只留在对话里。
+4. 安装、更新、卸载属于仓库维护动作，不属于默认运行时主流程。

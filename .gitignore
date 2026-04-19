@@ -2,8 +2,8 @@
 .DS_Store
 
 # Runtime / workspace
-/workspace/journals/
-/workspace/tool-usage.log
+/.autoharness/workspace/journals/
+/.autoharness/workspace/tool-usage.log
 /.planning/CONTEXT.md
 /.planning/REQUIREMENTS.md
 /.current-task
@@ -30,4 +30,3 @@ Thumbs.db
 .claude/
 .codex/
 CLAUDE.md
-/workspace/STATE.md

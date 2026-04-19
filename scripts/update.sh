@@ -89,6 +89,62 @@ backup_file() {
   fi
 }
 
+remove_file() {
+  local file="$1"
+  if [ ! -f "$file" ]; then
+    return
+  fi
+
+  if [ "$DRY_RUN" = true ]; then
+    echo "  🗑️  将删除：$file"
+  else
+    rm -f "$file"
+    echo "  ✅ 已删除：$file"
+  fi
+}
+
+remove_dir() {
+  local dir="$1"
+  if [ ! -d "$dir" ]; then
+    return
+  fi
+
+  if [ "$DRY_RUN" = true ]; then
+    echo "  🗑️  将删除目录：$dir/"
+  else
+    rm -rf "$dir"
+    echo "  ✅ 已删除目录：$dir/"
+  fi
+}
+
+write_managed_file() {
+  local dst="$1"
+  local content="$2"
+  local tmp
+
+  tmp="$(mktemp)"
+  printf '%s\n' "$content" > "$tmp"
+
+  if [ -f "$dst" ] && diff -q "$tmp" "$dst" >/dev/null 2>&1; then
+    rm -f "$tmp"
+    return
+  fi
+
+  if [ "$DRY_RUN" = true ]; then
+    echo "  🔄 将更新：$dst"
+    rm -f "$tmp"
+    return
+  fi
+
+  mkdir -p "$(dirname "$dst")"
+  if [ -f "$dst" ]; then
+    backup_file "$dst"
+  fi
+  cp "$tmp" "$dst"
+  rm -f "$tmp"
+  echo "  ✅ 已更新：$dst"
+}
+
 update_file() {
   local src="$1"
   local dst="$2"
@@ -121,35 +177,24 @@ update_file() {
   fi
 }
 
-sync_dir_if_missing() {
-  local src="$1"
-  local dst="$2"
-  if [ ! -d "$src" ]; then
-    return
-  fi
-
-  if [ "$DRY_RUN" = true ]; then
-    echo "  🔄 将同步缺失文件：$dst/"
-  else
-    mkdir -p "$dst"
-    cp -rn "$src/"* "$dst/" 2>/dev/null || true
-    echo "  ✅ 已同步：$dst/"
-  fi
-}
-
 INSTALLED_TOOLS=()
 [ -d ".claude" ] && INSTALLED_TOOLS+=("claude")
 [ -d ".codex" ] && INSTALLED_TOOLS+=("codex")
 
 echo "检测到已安装的工具：${INSTALLED_TOOLS[*]:-none}"
 echo ""
+
 echo "开始更新..."
 echo ""
 
 echo "📁 公共文件:"
 mkdir -p ".autoharness"
 update_file "$AGENTS_TEMPLATE" "AGENTS.md" "$FORCE"
-update_file "$AGENTS_TEMPLATE" ".autoharness/AGENTS.md" true
+remove_file ".autoharness/AGENTS.md"
+remove_dir ".autoharness/rules"
+remove_dir ".autoharness/skills"
+remove_dir ".autoharness/hooks"
+remove_dir ".autoharness/lib"
 
 if [ ! -f ".autoharness/project.md" ]; then
   if [ "$DRY_RUN" = true ]; then
@@ -184,35 +229,18 @@ for file in "$ASSET_DIR/templates/"*.md; do
   update_file "$file" ".autoharness/templates/$(basename "$file")" "$FORCE"
 done
 
-for file in "$ASSET_DIR/rules/"*.md; do
-  [ -f "$file" ] || continue
-  update_file "$file" ".autoharness/rules/$(basename "$file")" "$FORCE"
-done
-
-for file in "$ASSET_DIR/skills/"*.md; do
-  [ -f "$file" ] || continue
-  update_file "$file" ".autoharness/skills/$(basename "$file")" "$FORCE"
-done
-
-for file in "$ASSET_DIR/hooks/"*; do
-  [ -f "$file" ] || continue
-  update_file "$file" ".autoharness/hooks/$(basename "$file")" "$FORCE"
-done
-
 for file in "$SCRIPT_SOURCE_DIR/"*.sh; do
   [ -f "$file" ] || continue
   update_file "$file" ".autoharness/scripts/$(basename "$file")" "$FORCE"
 done
-
-if [ -d "$ASSET_DIR/lib" ]; then
-  sync_dir_if_missing "$ASSET_DIR/lib" ".autoharness/lib"
-fi
 
 for tool in "${INSTALLED_TOOLS[@]}"; do
   echo ""
   case "$tool" in
     claude)
       echo "🔧 Claude Code skills:"
+      remove_dir ".claude/rules"
+      remove_dir ".claude/lib"
       if [ -d ".claude/skills" ]; then
         find ".claude/skills" -maxdepth 1 -name "ah-*.md" -delete 2>/dev/null || true
 
@@ -229,22 +257,11 @@ for tool in "${INSTALLED_TOOLS[@]}"; do
         done
       fi
 
-      if [ -d ".claude/rules" ]; then
-        for rule in "$ASSET_DIR/rules/"*.md; do
-          [ -f "$rule" ] || continue
-          update_file "$rule" ".claude/rules/$(basename "$rule")" "$FORCE"
-        done
-      fi
-
       if [ -d ".claude/hooks" ]; then
         for hook in "$ASSET_DIR/hooks/"*.js; do
           [ -f "$hook" ] || continue
           update_file "$hook" ".claude/hooks/$(basename "$hook")" "$FORCE"
         done
-      fi
-
-      if [ -d "$ASSET_DIR/lib" ]; then
-        sync_dir_if_missing "$ASSET_DIR/lib" ".claude/lib"
       fi
       ;;
     codex)
@@ -254,13 +271,19 @@ for tool in "${INSTALLED_TOOLS[@]}"; do
   esac
 done
 
+if printf '%s\n' "${INSTALLED_TOOLS[@]}" | grep -qx 'claude'; then
+  echo ""
+  echo "🔧 Claude Code 入口:"
+  write_managed_file "CLAUDE.md" "@AGENTS.md"
+fi
+
 echo ""
 echo "✅ 更新完成"
 echo ""
-echo "如需升级外部源码版本，请使用新的源码仓库执行："
-echo "  bash $0"
+echo "如需从源码仓库升级到最新版本，请在外部 AutoHarness 源码仓库中执行："
+echo "  bash /path/to/autoHarness/scripts/update.sh --target $TARGET"
 if [ "$FORCE" = false ]; then
   echo ""
   echo "如需强制覆盖已存在文件："
-  echo "  bash $0 --force"
+  echo "  bash /path/to/autoHarness/scripts/update.sh --target $TARGET --force"
 fi

@@ -20,9 +20,6 @@
   "paths": {
     "specs_dir": ".autoharness/specs",
     "changes_dir": ".autoharness/changes",
-    "skills_dir": ".autoharness/skills",
-    "rules_dir": ".autoharness/rules",
-    "hooks_dir": ".autoharness/hooks",
     "workspace_dir": ".autoharness/workspace",
     "planning_dir": ".autoharness/.planning"
   }
