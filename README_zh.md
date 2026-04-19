@@ -106,7 +106,7 @@ ls your-project/.autoharness
 
 | 你说 | 实际脚本 |
 |---|---|
-| `Install AutoHarness` | `bash .autoharness/scripts/install.sh` |
+| `Install AutoHarness` | `bash /path/to/autoHarness/scripts/install.sh` |
 | `Update AutoHarness` | `bash .autoharness/scripts/update.sh` |
 | `Preview update` | `bash .autoharness/scripts/update.sh --dry-run` |
 | `Force update` | `bash .autoharness/scripts/update.sh --force` |

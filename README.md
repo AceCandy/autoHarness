@@ -109,7 +109,7 @@ These are script actions triggered via natural language:
 
 | You say | Script |
 |---|---|
-| `Install AutoHarness` | `bash .autoharness/scripts/install.sh` |
+| `Install AutoHarness` | `bash /path/to/autoHarness/scripts/install.sh` |
 | `Update AutoHarness` | `bash .autoharness/scripts/update.sh` |
 | `Preview update` | `bash .autoharness/scripts/update.sh --dry-run` |
 | `Force update` | `bash .autoharness/scripts/update.sh --force` |

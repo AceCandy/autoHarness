@@ -78,7 +78,7 @@ You can use natural language to trigger these actions:
 
 | You say | AI executes |
 |---------|-------------|
-| "Install AutoHarness" | `bash .autoharness/scripts/install.sh` |
+| "Install AutoHarness" | `bash /path/to/autoHarness/scripts/install.sh` |
 | "Update AutoHarness" | `bash .autoharness/scripts/update.sh` |
 | "I want to add a feature" | `/ah-propose <name>` |
 | "Discuss requirements" | `/ah-discuss <name>` |
@@ -114,7 +114,7 @@ Bug flow:
 
 | You say | Script |
 |---------|--------|
-| "Install AutoHarness" | `bash .autoharness/scripts/install.sh` |
+| "Install AutoHarness" | `bash /path/to/autoHarness/scripts/install.sh` |
 | "Update AutoHarness" | `bash .autoharness/scripts/update.sh` |
 | "Preview update" | `bash .autoharness/scripts/update.sh --dry-run` |
 | "Force update" | `bash .autoharness/scripts/update.sh --force` |
