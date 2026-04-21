@@ -22,6 +22,71 @@ AGENTS_TEMPLATE="$SCRIPT_HOME/AGENTS.md"
 if [ ! -f "$AGENTS_TEMPLATE" ] && [ -f "$ASSET_DIR/AGENTS.md" ]; then
   AGENTS_TEMPLATE="$ASSET_DIR/AGENTS.md"
 fi
+POLICY_TEMPLATE="$ASSET_DIR/policy.json"
+MANIFEST_REL=".autoharness/install-manifest.json"
+
+expand_path() {
+  case "$1" in
+    "~")
+      printf '%s\n' "$HOME"
+      ;;
+    "~/"*)
+      printf '%s/%s\n' "$HOME" "${1#~/}"
+      ;;
+    *)
+      printf '%s\n' "$1"
+      ;;
+  esac
+}
+
+resolve_existing_dir() {
+  local input expanded
+
+  input="$1"
+  expanded="$(expand_path "$input")"
+
+  if [ ! -d "$expanded" ]; then
+    return 1
+  fi
+
+  (
+    cd "$expanded" && pwd -P
+  )
+}
+
+append_unique() {
+  local var_name="$1"
+  local value="$2"
+  local current item
+
+  eval "current=(\"\${${var_name}[@]}\")"
+  for item in "${current[@]}"; do
+    if [ "$item" = "$value" ]; then
+      return 0
+    fi
+  done
+
+  eval "${var_name}+=(\"\$value\")"
+}
+
+manifest_list_array() {
+  local manifest_path="$1"
+  local key="$2"
+
+  [ -f "$manifest_path" ] || return 0
+
+  awk -v key="\"$key\"" '
+    $0 ~ key "[[:space:]]*:[[:space:]]*\\[" { in_array=1; next }
+    in_array && $0 ~ /^[[:space:]]*]/ { in_array=0; next }
+    in_array {
+      line=$0
+      gsub(/^[[:space:]]*"/, "", line)
+      gsub(/",[[:space:]]*$/, "", line)
+      gsub(/"[[:space:]]*$/, "", line)
+      if (length(line) > 0) print line
+    }
+  ' "$manifest_path"
+}
 
 TARGET="."
 DRY_RUN=false
@@ -56,18 +121,31 @@ for arg in "$@"; do
   esac
 done
 
-EXPANDED_TARGET=$(eval echo "$TARGET")
+EXPANDED_TARGET="$(resolve_existing_dir "$TARGET" || true)"
+if [ -z "$EXPANDED_TARGET" ]; then
+  echo "❌ 目标目录不存在：$TARGET"
+  exit 1
+fi
+
 if [ "$EXPANDED_TARGET" = "$HOME" ] || [ "$EXPANDED_TARGET" = "/" ]; then
   echo "❌ 不允许在 home 目录或根目录更新"
   exit 1
 fi
 
-if [ ! -d "$TARGET" ]; then
-  echo "❌ 目标目录不存在：$TARGET"
-  exit 1
-fi
+TARGET="$EXPANDED_TARGET"
 
 cd "$TARGET"
+MANIFEST_PATH="$TARGET/$MANIFEST_REL"
+
+MANAGED_ROOT_FILES=()
+MANIFEST_FOUND=false
+
+if [ -f "$MANIFEST_PATH" ]; then
+  MANIFEST_FOUND=true
+  while IFS= read -r item; do
+    [ -n "$item" ] && append_unique MANAGED_ROOT_FILES "$item"
+  done < <(manifest_list_array "$MANIFEST_PATH" "managed_root_files")
+fi
 
 if [ ! -d ".autoharness" ] && [ ! -f "AGENTS.md" ] && [ ! -f "CLAUDE.md" ] && [ ! -d ".claude" ] && [ ! -d ".codex" ]; then
   echo "⚠️  未检测到 AutoHarness 安装"
@@ -79,6 +157,11 @@ fi
 
 echo "目标目录：$TARGET"
 echo ""
+
+if [ "$MANIFEST_FOUND" = false ]; then
+  echo "⚠️  未检测到 install-manifest，根目录托管文件将按保守模式跳过"
+  echo ""
+fi
 
 backup_file() {
   local file="$1"
@@ -189,7 +272,13 @@ echo ""
 
 echo "📁 公共文件:"
 mkdir -p ".autoharness"
-update_file "$AGENTS_TEMPLATE" "AGENTS.md" "$FORCE"
+if printf '%s\n' "${MANAGED_ROOT_FILES[@]}" | grep -qx "AGENTS.md"; then
+  update_file "$AGENTS_TEMPLATE" "AGENTS.md" "$FORCE"
+else
+  if [ -f "AGENTS.md" ]; then
+    echo "  ⏭️  跳过：AGENTS.md (未标记为 AutoHarness 托管)"
+  fi
+fi
 remove_file ".autoharness/AGENTS.md"
 remove_dir ".autoharness/config"
 remove_dir ".autoharness/rules"
@@ -210,6 +299,24 @@ else
     update_file "$ASSET_DIR/project.md" ".autoharness/project.md" true
   else
     echo "  ⏭️  跳过：.autoharness/project.md (保留用户自定义)"
+  fi
+fi
+
+if [ -f "$POLICY_TEMPLATE" ]; then
+  if [ ! -f ".autoharness/policy.json" ]; then
+    if [ "$DRY_RUN" = true ]; then
+      echo "  📄 将创建：.autoharness/policy.json"
+    else
+      mkdir -p ".autoharness"
+      cp "$POLICY_TEMPLATE" ".autoharness/policy.json"
+      echo "  ✅ 已创建：.autoharness/policy.json"
+    fi
+  else
+    if [ "$FORCE" = true ]; then
+      update_file "$POLICY_TEMPLATE" ".autoharness/policy.json" true
+    else
+      echo "  ⏭️  跳过：.autoharness/policy.json (保留用户自定义)"
+    fi
   fi
 fi
 
@@ -236,6 +343,8 @@ remove_file ".autoharness/scripts/update.sh"
 remove_file ".autoharness/scripts/init.sh"
 remove_file ".autoharness/scripts/uninstall.sh"
 update_file "$SCRIPT_SOURCE_DIR/archive-change.sh" ".autoharness/scripts/archive-change.sh" "$FORCE"
+update_file "$SCRIPT_SOURCE_DIR/state.js" ".autoharness/scripts/state.js" "$FORCE"
+update_file "$SCRIPT_SOURCE_DIR/verify.js" ".autoharness/scripts/verify.js" "$FORCE"
 
 for tool in "${INSTALLED_TOOLS[@]}"; do
   echo ""
@@ -277,7 +386,13 @@ done
 if printf '%s\n' "${INSTALLED_TOOLS[@]}" | grep -qx 'claude'; then
   echo ""
   echo "🔧 Claude Code 入口:"
-  write_managed_file "CLAUDE.md" "@AGENTS.md"
+  if printf '%s\n' "${MANAGED_ROOT_FILES[@]}" | grep -qx "CLAUDE.md"; then
+    write_managed_file "CLAUDE.md" "@AGENTS.md"
+  else
+    if [ -f "CLAUDE.md" ]; then
+      echo "  ⏭️  跳过：CLAUDE.md (未标记为 AutoHarness 托管)"
+    fi
+  fi
 fi
 
 echo ""

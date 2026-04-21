@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "hard_block": [
+    {
+      "id": "bash-rm-rf",
+      "tool": "Bash",
+      "regex": "(^|[;&|\\s])rm\\s+-rf(\\s|$)",
+      "message": "检测到 rm -rf。删除目录前必须先获得明确确认。"
+    },
+    {
+      "id": "bash-git-add-all",
+      "tool": "Bash",
+      "regex": "(^|[;&|\\s])git\\s+add\\s+-A(\\s|$)",
+      "message": "检测到 git add -A。请先确认 staged 范围，而不是一次性加入全部改动。"
+    },
+    {
+      "id": "bash-no-verify",
+      "tool": "Bash",
+      "regex": "(^|\\s)--no-verify(\\s|$)",
+      "message": "检测到 --no-verify。跳过校验前必须先获得明确确认。"
+    }
+  ],
+  "soft_warn": [
+    {
+      "id": "bash-git-push-force",
+      "tool": "Bash",
+      "regex": "(^|[;&|\\s])git\\s+push\\s+--force(\\s|$)",
+      "message": "检测到 git push --force，请确认是否真的需要改写远端历史。"
+    }
+  ],
+  "allowlist": [],
+  "secret_patterns": [
+    {
+      "id": "openai-key",
+      "regex": "sk-[A-Za-z0-9]{20,}",
+      "message": "检测到疑似 OpenAI API Key，请确认是否包含敏感信息。"
+    },
+    {
+      "id": "github-token",
+      "regex": "ghp_[A-Za-z0-9]{36}",
+      "message": "检测到疑似 GitHub Token，请确认是否包含敏感信息。"
+    },
+    {
+      "id": "aws-key",
+      "regex": "AKIA[0-9A-Z]{16}",
+      "message": "检测到疑似 AWS Access Key，请确认是否包含敏感信息。"
+    },
+    {
+      "id": "private-key",
+      "regex": "-----BEGIN (RSA |EC )?PRIVATE KEY-----",
+      "message": "检测到疑似私钥内容，请立即确认。"
+    }
+  ]
+}

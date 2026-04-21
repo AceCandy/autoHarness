@@ -21,6 +21,138 @@ AGENTS_TEMPLATE="$SCRIPT_HOME/AGENTS.md"
 if [ ! -f "$AGENTS_TEMPLATE" ] && [ -f "$ASSET_DIR/AGENTS.md" ]; then
   AGENTS_TEMPLATE="$ASSET_DIR/AGENTS.md"
 fi
+POLICY_TEMPLATE="$ASSET_DIR/policy.json"
+MANIFEST_REL=".autoharness/install-manifest.json"
+
+expand_path() {
+  case "$1" in
+    "~")
+      printf '%s\n' "$HOME"
+      ;;
+    "~/"*)
+      printf '%s/%s\n' "$HOME" "${1#~/}"
+      ;;
+    *)
+      printf '%s\n' "$1"
+      ;;
+  esac
+}
+
+resolve_existing_dir() {
+  local input expanded
+
+  input="$1"
+  expanded="$(expand_path "$input")"
+
+  if [ ! -d "$expanded" ]; then
+    return 1
+  fi
+
+  (
+    cd "$expanded" && pwd -P
+  )
+}
+
+append_unique() {
+  local var_name="$1"
+  local value="$2"
+  local current item
+
+  eval "current=(\"\${${var_name}[@]}\")"
+  for item in "${current[@]}"; do
+    if [ "$item" = "$value" ]; then
+      return 0
+    fi
+  done
+
+  eval "${var_name}+=(\"\$value\")"
+}
+
+manifest_list_array() {
+  local manifest_path="$1"
+  local key="$2"
+
+  [ -f "$manifest_path" ] || return 0
+
+  awk -v key="\"$key\"" '
+    $0 ~ key "[[:space:]]*:[[:space:]]*\\[" { in_array=1; next }
+    in_array && $0 ~ /^[[:space:]]*]/ { in_array=0; next }
+    in_array {
+      line=$0
+      gsub(/^[[:space:]]*"/, "", line)
+      gsub(/",[[:space:]]*$/, "", line)
+      gsub(/"[[:space:]]*$/, "", line)
+      if (length(line) > 0) print line
+    }
+  ' "$manifest_path"
+}
+
+manifest_read_bool() {
+  local manifest_path="$1"
+  local key="$2"
+
+  [ -f "$manifest_path" ] || return 1
+
+  grep -Eq "\"$key\"[[:space:]]*:[[:space:]]*true" "$manifest_path"
+}
+
+json_escape() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+write_manifest() {
+  local manifest_path="$1"
+  local item
+
+  mkdir -p "$(dirname "$manifest_path")"
+
+  {
+    echo "{"
+    echo "  \"version\": 1,"
+    printf '  "installed_at": "%s",\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "  \"installed_tools\": ["
+    for i in "${!INSTALLED_TOOLS[@]}"; do
+      item="$(json_escape "${INSTALLED_TOOLS[$i]}")"
+      if [ "$i" -gt 0 ]; then
+        printf ',\n'
+      fi
+      printf '    "%s"' "$item"
+    done
+    echo
+    echo "  ],"
+    echo "  \"managed_root_files\": ["
+    for i in "${!MANAGED_ROOT_FILES[@]}"; do
+      item="$(json_escape "${MANAGED_ROOT_FILES[$i]}")"
+      if [ "$i" -gt 0 ]; then
+        printf ',\n'
+      fi
+      printf '    "%s"' "$item"
+    done
+    echo
+    echo "  ],"
+    echo "  \"created_dirs\": ["
+    for i in "${!CREATED_DIRS[@]}"; do
+      item="$(json_escape "${CREATED_DIRS[$i]}")"
+      if [ "$i" -gt 0 ]; then
+        printf ',\n'
+      fi
+      printf '    "%s"' "$item"
+    done
+    echo
+    echo "  ],"
+    if [ "$CLAUDE_HOOKS_INSTALLED" = true ]; then
+      echo "  \"claude_hooks_installed\": true,"
+    else
+      echo "  \"claude_hooks_installed\": false,"
+    fi
+    if [ "$CLAUDE_SETTINGS_CREATED" = true ]; then
+      echo "  \"claude_settings_created\": true"
+    else
+      echo "  \"claude_settings_created\": false"
+    fi
+    echo "}"
+  } > "$manifest_path"
+}
 
 TOOLS=()
 TARGET="."
@@ -77,8 +209,13 @@ echo "目标目录: $TARGET"
 echo "安装工具: ${TOOLS[*]}"
 echo ""
 
-EXPANDED_TARGET=$(eval echo "$TARGET")
-if [ "$EXPANDED_TARGET" = "$HOME" ] || [ "$EXPANDED_TARGET" = "/" ] || [ "$EXPANDED_TARGET" = "$HOME/" ]; then
+EXPANDED_TARGET="$(resolve_existing_dir "$TARGET" || true)"
+if [ -z "$EXPANDED_TARGET" ]; then
+  echo "❌ 目标目录不存在: $TARGET"
+  exit 1
+fi
+
+if [ "$EXPANDED_TARGET" = "$HOME" ] || [ "$EXPANDED_TARGET" = "/" ]; then
   echo "❌ 不允许安装到 home 目录 ($HOME) 或根目录"
   echo ""
   echo "请在项目目录下运行安装："
@@ -86,15 +223,49 @@ if [ "$EXPANDED_TARGET" = "$HOME" ] || [ "$EXPANDED_TARGET" = "/" ] || [ "$EXPAN
   exit 1
 fi
 
-if [ ! -d "$TARGET" ]; then
-  echo "❌ 目标目录不存在: $TARGET"
-  exit 1
-fi
+TARGET="$EXPANDED_TARGET"
 
 cd "$TARGET"
+MANIFEST_PATH="$TARGET/$MANIFEST_REL"
+
+MANAGED_ROOT_FILES=()
+CREATED_DIRS=()
+INSTALLED_TOOLS=()
+CLAUDE_HOOKS_INSTALLED=false
+CLAUDE_SETTINGS_CREATED=false
+
+if [ -f "$MANIFEST_PATH" ]; then
+  while IFS= read -r item; do
+    [ -n "$item" ] && append_unique MANAGED_ROOT_FILES "$item"
+  done < <(manifest_list_array "$MANIFEST_PATH" "managed_root_files")
+
+  while IFS= read -r item; do
+    [ -n "$item" ] && append_unique CREATED_DIRS "$item"
+  done < <(manifest_list_array "$MANIFEST_PATH" "created_dirs")
+
+  while IFS= read -r item; do
+    [ -n "$item" ] && append_unique INSTALLED_TOOLS "$item"
+  done < <(manifest_list_array "$MANIFEST_PATH" "installed_tools")
+
+  if manifest_read_bool "$MANIFEST_PATH" "claude_hooks_installed"; then
+    CLAUDE_HOOKS_INSTALLED=true
+  fi
+  if manifest_read_bool "$MANIFEST_PATH" "claude_settings_created"; then
+    CLAUDE_SETTINGS_CREATED=true
+  fi
+fi
+
+AUTOHARNESS_DIR_EXISTED=false
+CLAUDE_DIR_EXISTED=false
+CODEX_DIR_EXISTED=false
+
+[ -d ".autoharness" ] && AUTOHARNESS_DIR_EXISTED=true
+[ -d ".claude" ] && CLAUDE_DIR_EXISTED=true
+[ -d ".codex" ] && CODEX_DIR_EXISTED=true
 
 echo "📁 复制公共文件..."
 mkdir -p .autoharness
+[ "$AUTOHARNESS_DIR_EXISTED" = false ] && append_unique CREATED_DIRS ".autoharness"
 TARGET_ASSET_DIR="$(cd .autoharness && pwd)"
 SOURCE_ASSET_DIR="$(cd "$ASSET_DIR" && pwd)"
 ASSET_SELF=false
@@ -110,8 +281,12 @@ if [ -d "$SCRIPT_SOURCE_DIR" ]; then
   SOURCE_SCRIPT_DIR="$(cd "$SCRIPT_SOURCE_DIR" && pwd)"
 fi
 
-[ ! -f "AGENTS.md" ] && cp "$AGENTS_TEMPLATE" .
+if [ ! -f "AGENTS.md" ]; then
+  cp "$AGENTS_TEMPLATE" .
+  append_unique MANAGED_ROOT_FILES "AGENTS.md"
+fi
 [ ! -f ".autoharness/project.md" ] && [ "$ASSET_SELF" = false ] && cp "$ASSET_DIR/project.md" ".autoharness/project.md"
+[ ! -f ".autoharness/policy.json" ] && [ "$ASSET_SELF" = false ] && [ -f "$POLICY_TEMPLATE" ] && cp "$POLICY_TEMPLATE" ".autoharness/policy.json"
 rm -f ".autoharness/AGENTS.md"
 rm -rf ".autoharness/config" ".autoharness/rules" ".autoharness/skills" ".autoharness/hooks" ".autoharness/lib"
 rm -f ".autoharness/scripts/install.sh" ".autoharness/scripts/update.sh" ".autoharness/scripts/init.sh" ".autoharness/scripts/uninstall.sh"
@@ -128,6 +303,14 @@ if [ -f "$SCRIPT_SOURCE_DIR/archive-change.sh" ] && [ "$SOURCE_SCRIPT_DIR" != "$
   cp "$SCRIPT_SOURCE_DIR/archive-change.sh" ".autoharness/scripts/archive-change.sh"
 fi
 
+if [ -f "$SCRIPT_SOURCE_DIR/state.js" ] && [ "$SOURCE_SCRIPT_DIR" != "$TARGET_SCRIPT_DIR" ]; then
+  cp "$SCRIPT_SOURCE_DIR/state.js" ".autoharness/scripts/state.js"
+fi
+
+if [ -f "$SCRIPT_SOURCE_DIR/verify.js" ] && [ "$SOURCE_SCRIPT_DIR" != "$TARGET_SCRIPT_DIR" ]; then
+  cp "$SCRIPT_SOURCE_DIR/verify.js" ".autoharness/scripts/verify.js"
+fi
+
 mkdir -p .autoharness/changes/archive
 
 for tool in "${TOOLS[@]}"; do
@@ -137,6 +320,7 @@ for tool in "${TOOLS[@]}"; do
       echo "🔧 安装到 Claude Code..."
 
       mkdir -p .claude/{skills,hooks}
+      [ "$CLAUDE_DIR_EXISTED" = false ] && append_unique CREATED_DIRS ".claude"
       rm -rf .claude/rules .claude/lib
 
       if [ -f "CLAUDE.md" ]; then
@@ -145,6 +329,7 @@ for tool in "${TOOLS[@]}"; do
         echo "  📦 备份: CLAUDE.md -> $BAK_FILE"
       fi
       printf '%s\n' '@AGENTS.md' > CLAUDE.md
+      append_unique MANAGED_ROOT_FILES "CLAUDE.md"
       echo "  ✅ CLAUDE.md 已创建/更新"
 
       rm -f .claude/skills/*.md 2>/dev/null || true
@@ -183,6 +368,7 @@ for tool in "${TOOLS[@]}"; do
         if command -v jq >/dev/null 2>&1; then
           if jq -e '.hooks.SessionStart[] | select(.hooks[].command | contains("session-start.js"))' "$BAK_FILE" >/dev/null 2>&1; then
             echo "  ✅ AutoHarness hooks 已存在，跳过合并"
+            CLAUDE_HOOKS_INSTALLED=true
           else
             jq \
               --argjson s "$OA_START" \
@@ -192,6 +378,7 @@ for tool in "${TOOLS[@]}"; do
               '.hooks.SessionStart = (.hooks.SessionStart // []) | .hooks.SessionEnd = (.hooks.SessionEnd // []) | .hooks.PreToolUse = (.hooks.PreToolUse // []) | .hooks.PostToolUse = (.hooks.PostToolUse // []) | .hooks.SessionStart = ([$s] + (.hooks.SessionStart | map(if has("matcher") then . else {matcher:"", hooks: [.]} end))) | .hooks.SessionEnd = ([$e] + (.hooks.SessionEnd | map(if has("matcher") then . else {matcher:"", hooks: [.]} end))) | .hooks.PreToolUse = ([$p] + (.hooks.PreToolUse | map(if has("matcher") then . else {matcher:"", hooks: [.]} end))) | .hooks.PostToolUse = ([$o] + (.hooks.PostToolUse | map(if has("matcher") then . else {matcher:"", hooks: [.]} end)))' \
               "$BAK_FILE" > .claude/settings.json
             echo "  ✅ .claude/settings.json 已更新（AutoHarness hooks 已合并）"
+            CLAUDE_HOOKS_INSTALLED=true
           fi
         else
           echo "  ⚠️  jq 未安装，无法自动合并 hooks。原始配置已备份，请手动处理。"
@@ -208,6 +395,8 @@ for tool in "${TOOLS[@]}"; do
 }
 EOF
         echo "  ✅ .claude/settings.json 已创建（含 hooks 配置）"
+        CLAUDE_HOOKS_INSTALLED=true
+        CLAUDE_SETTINGS_CREATED=true
       fi
       ;;
 
@@ -215,6 +404,7 @@ EOF
       echo ""
       echo "🔧 安装到 Codex..."
       mkdir -p .codex
+      [ "$CODEX_DIR_EXISTED" = false ] && append_unique CREATED_DIRS ".codex"
       [ ! -f "AGENTS.md" ] && cp "$AGENTS_TEMPLATE" .
       echo "  ✅ Codex 安装完成（通过 AGENTS.md 读取指令）"
       ;;
@@ -225,6 +415,11 @@ EOF
       ;;
   esac
 done
+
+[ -d ".claude" ] && append_unique INSTALLED_TOOLS "claude"
+[ -d ".codex" ] && append_unique INSTALLED_TOOLS "codex"
+
+write_manifest "$MANIFEST_PATH"
 
 echo ""
 echo "✅ AutoHarness 安装与初始化完成!"
